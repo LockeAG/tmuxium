@@ -26,9 +26,17 @@ start working straight away.
 
 ## What it looks like
 
-![The tab tree](assets/store/screenshot-02.png)
+`Ctrl-A` then `Ctrl-O`: every tab in every window, filtered as you type.
 
-![The help overlay](assets/store/screenshot-01.png)
+![The tab tree](assets/store/screenshot-01.png)
+
+`Ctrl-A` then `?`: every key, drawn in the page.
+
+![Every key](assets/store/screenshot-02.png)
+
+`Ctrl-A` then `,`: rebind the prefix, or switch the extension off per site.
+
+![Settings](assets/store/screenshot-03.png)
 
 ## Prefix
 
@@ -182,8 +190,7 @@ pnpm build:store                                   # dist/, without the new tab
 npm run typecheck                                  # types only
 node tools/make-icons.cjs icons                    # extension icons
 node tools/make-screenshots.mjs                     # store screenshots
-node tools/make-store-shots.cjs <src> assets/store
-node tools/make-promo.cjs <capture> assets/store
+node tools/make-promo.cjs <capture> assets/store   # cover and promo tiles
 ```
 
 The store build is deliberately narrower: `pnpm build:store` writes `dist/`
