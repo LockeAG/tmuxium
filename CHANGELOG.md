@@ -3,6 +3,25 @@
 Notable changes, newest first. Follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 loosely and [semantic versioning](https://semver.org/).
 
+## Planned
+
+For 1.1, once the store listing is approved. Both change the submitted package,
+so neither goes in while a review is pending.
+
+- **Search from the tab tree.** `Ctrl-Enter` searches the filter text with the
+  configured engine, and the empty state becomes an offer to search rather than
+  a dead `No matches`. Not plain `Enter`, which means "switch to the selected
+  tab": overloading it turns a reflex press after a failed filter into an
+  unwanted navigation. This also gives the search engine setting a job in the
+  store build, where the New Tab Page is stripped and nothing reads it.
+- **Favicons back in the tab tree.** They were removed because setting `img.src`
+  to each tab's favicon fires a request per open tab from inside the page you
+  are on, letting it harvest your open hostnames from the resource timeline. The
+  safe route is the service worker fetching `_favicon` from Chrome's local
+  cache, converting to a `data:` URI and caching by origin, so nothing the page
+  can observe ever names a host. Costs the `favicon` permission back in the
+  store build.
+
 ## 0.2.3 - 2026-08-07
 
 ### Changed
