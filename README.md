@@ -1,6 +1,6 @@
 # Tmuxium
 
-[![CI](https://github.com/LockeAG/chrome-tmux/actions/workflows/ci.yml/badge.svg)](https://github.com/LockeAG/chrome-tmux/actions/workflows/ci.yml)
+[![CI](https://github.com/LockeAG/tmuxium/actions/workflows/ci.yml/badge.svg)](https://github.com/LockeAG/tmuxium/actions/workflows/ci.yml)
 
 ![Tmuxium](assets/store/cover.png)
 
@@ -17,7 +17,7 @@ window, a Chrome window is a tmux session, so `Ctrl-A w` lists your tabs the way
 ## Install
 
 ```fish
-git clone git@github.com:LockeAG/chrome-tmux.git
+git clone git@github.com:LockeAG/tmuxium.git
 open -a "Google Chrome" chrome://extensions
 ```
 

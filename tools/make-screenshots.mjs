@@ -25,7 +25,7 @@ const TABS = [
   'https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent',
   'https://en.wikipedia.org/wiki/Tmux',
   'https://news.ycombinator.com/',
-  'https://github.com/LockeAG/chrome-tmux'
+  'https://github.com/LockeAG/tmuxium'
 ];
 
 const store = mkdtempSync(path.join(tmpdir(), 'tmuxium-shots-build-'));

@@ -104,7 +104,7 @@ Keys typed in the address bar belong to Chrome, not to the page.
 Link hints skip anything inside an iframe. There are no counts like 3j and no
 marks yet.
 
-Open source, MIT licensed: https://github.com/LockeAG/chrome-tmux
+Open source, MIT licensed: https://github.com/LockeAG/tmuxium
 ```
 
 ---
@@ -189,7 +189,7 @@ send it to.
 ### Privacy policy URL
 
 ```
-https://github.com/LockeAG/chrome-tmux/blob/main/PRIVACY.md
+https://github.com/LockeAG/tmuxium/blob/main/PRIVACY.md
 ```
 
 ---

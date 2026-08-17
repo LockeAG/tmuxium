@@ -53,7 +53,7 @@ const NOT_CALLS = [
   'https://www.skype.com/en/',
   'https://discord.com/channels/12345/67890',
   'https://app.slack.com/client/T123/C456',
-  'https://github.com/LockeAG/chrome-tmux',
+  'https://github.com/LockeAG/tmuxium',
   'chrome://extensions/',
   '',
   undefined,

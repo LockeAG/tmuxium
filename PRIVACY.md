@@ -80,6 +80,6 @@ spreadsheets and mail already on it.
 
 Any change to this policy will appear in
 [CHANGELOG.md](CHANGELOG.md) and in the repository history at
-https://github.com/LockeAG/chrome-tmux.
+https://github.com/LockeAG/tmuxium.
 
 Last updated: 2026-08-07.
