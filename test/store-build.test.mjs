@@ -14,7 +14,7 @@ import path from 'node:path';
 const root = fileURLToPath(new URL('..', import.meta.url));
 
 function build() {
-  const out = mkdtempSync(path.join(tmpdir(), 'chrome-tmux-store-'));
+  const out = mkdtempSync(path.join(tmpdir(), 'tmuxium-store-'));
   execFileSync('node', [path.join(root, 'tools/build-store.cjs'), out], { stdio: 'pipe' });
   return out;
 }

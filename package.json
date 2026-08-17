@@ -1,5 +1,5 @@
 {
-  "name": "chrome-tmux",
+  "name": "tmuxium",
   "version": "0.2.3",
   "private": true,
   "description": "A tmux-style prefix and a vim mode for Chrome.",

@@ -16,7 +16,7 @@
 (() => {
   // A previous instance may still be here: injected twice, or orphaned by an
   // extension reload. Either way, retire it and take over.
-  globalThis.__CHROME_TMUX__?.retire?.();
+  globalThis.__TMUXIUM__?.retire?.();
 
   const SCROLL_STEP = 64;
   const UI = globalThis.SV_UI;
@@ -426,6 +426,6 @@
   chrome.storage.onChanged.addListener(onSettingsChanged);
   reload();
 
-  globalThis.__CHROME_TMUX__ = { retire };
-  console.log('[chrome-tmux] content script ready');
+  globalThis.__TMUXIUM__ = { retire };
+  console.log('[tmuxium] content script ready');
 })();

@@ -78,7 +78,7 @@
     });
   }).catch((error) => {
     // A missing topSites permission should cost you the tiles, not the console.
-    console.warn('[chrome-tmux] top sites unavailable:', error?.message ?? error);
+    console.warn('[tmuxium] top sites unavailable:', error?.message ?? error);
   });
 
 })();

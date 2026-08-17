@@ -37,7 +37,7 @@ export const test = base.extend({
   },
 
   context: async ({}, use) => {
-    const profile = mkdtempSync(path.join(tmpdir(), 'chrome-tmux-'));
+    const profile = mkdtempSync(path.join(tmpdir(), 'tmuxium-'));
     const context = await chromium.launchPersistentContext(profile, {
       channel: 'chromium',
       args: [

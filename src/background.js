@@ -75,7 +75,7 @@ async function ensureContentScript(tabId, url) {
     });
     return true;
   } catch (error) {
-    console.warn('[chrome-tmux] inject failed:', error?.message ?? error);
+    console.warn('[tmuxium] inject failed:', error?.message ?? error);
     return false;
   }
 }

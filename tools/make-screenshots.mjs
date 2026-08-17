@@ -28,10 +28,10 @@ const TABS = [
   'https://github.com/LockeAG/chrome-tmux'
 ];
 
-const store = mkdtempSync(path.join(tmpdir(), 'chrome-tmux-shots-build-'));
+const store = mkdtempSync(path.join(tmpdir(), 'tmuxium-shots-build-'));
 execFileSync('node', [path.join(root, 'tools/build-store.cjs'), store], { stdio: 'pipe' });
 
-const profile = mkdtempSync(path.join(tmpdir(), 'chrome-tmux-shots-'));
+const profile = mkdtempSync(path.join(tmpdir(), 'tmuxium-shots-'));
 const context = await chromium.launchPersistentContext(profile, {
   channel: 'chromium',
   viewport: SIZE,

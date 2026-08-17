@@ -15,9 +15,9 @@ const root = fileURLToPath(new URL('..', import.meta.url));
 
 const test = base.extend({
   store: async ({}, use) => {
-    const out = mkdtempSync(path.join(tmpdir(), 'chrome-tmux-store-'));
+    const out = mkdtempSync(path.join(tmpdir(), 'tmuxium-store-'));
     execFileSync('node', [path.join(root, 'tools/build-store.cjs'), out], { stdio: 'pipe' });
-    const profile = mkdtempSync(path.join(tmpdir(), 'chrome-tmux-store-profile-'));
+    const profile = mkdtempSync(path.join(tmpdir(), 'tmuxium-store-profile-'));
 
     const context = await chromium.launchPersistentContext(profile, {
       channel: 'chromium',
