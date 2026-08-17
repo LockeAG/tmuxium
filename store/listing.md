@@ -104,7 +104,7 @@ Keys typed in the address bar belong to Chrome, not to the page.
 Link hints skip anything inside an iframe. There are no counts like 3j and no
 marks yet.
 
-Open source, MIT licensed: https://github.com/LockeAG/tmuxium
+Tmuxium is open source, MIT licensed: https://github.com/LockeAG/tmuxium
 ```
 
 ---
