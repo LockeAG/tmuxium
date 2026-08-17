@@ -11,7 +11,7 @@ Submit the zip of `dist/`, not the repository.
 ## Product name
 
 ```
-chrome-tmux
+Tmuxium
 ```
 
 ## Summary
@@ -80,8 +80,8 @@ prefix twice to get it back, exactly like send-prefix in tmux.
 On Windows and Linux the default is Alt-A instead, because Ctrl-A is select-all
 there. Either way the prefix is rebindable in settings, and you can switch the
 extension off entirely on any site. Documents, spreadsheets and mail are on that
-list already: Gmail, Google Docs, Office on the web, SharePoint, Overleaf,
-Notion, Figma, Slack, vscode.dev and github.dev.
+list already, since their own editing keys matter more. Open settings to see the
+full list or change it.
 
 PRIVACY
 
@@ -114,7 +114,7 @@ Open source, MIT licensed: https://github.com/LockeAG/chrome-tmux
 ### Single purpose
 
 ```
-chrome-tmux provides keyboard-driven navigation of Chrome's tabs and windows
+Tmuxium provides keyboard-driven navigation of Chrome's tabs and windows
 using a tmux-style prefix key, plus vim-style keys for scrolling and following
 links within a page. Every feature serves that one purpose: switching between,
 opening, closing and moving around tabs and pages using the keyboard.
@@ -163,10 +163,9 @@ the focused field so it can move it. None of that is stored, logged or
 transmitted. It does not read passwords and does not record what the user
 types.
 
-Users can switch it off per site in the settings, and it ships already switched
-off for documents, spreadsheets and mail, where the browser's own editing keys
-matter more: Gmail, Google Docs, Office on the web, SharePoint, Overleaf,
-Notion, Figma, Slack, vscode.dev and github.dev.
+Users can switch it off per site in settings, and it ships already switched off
+for mail, document, spreadsheet and design editors (Gmail and Google Docs among
+them), where the page's own editing keys matter more.
 ```
 
 ### Remote code
@@ -201,8 +200,11 @@ https://github.com/LockeAG/chrome-tmux/blob/main/PRIVACY.md
 - [ ] Load that zip unpacked once and press the keys. It is a different build
       from the one you have been using: no New Tab Page, and `tabs`, `storage`
       and `scripting` where the repo build also has `topSites` and `favicon`
-- [ ] Check `manifest.json` in the zip says `0.2.3` and lists exactly
+- [ ] Check `manifest.json` in the zip says `Tmuxium` and lists exactly
       `tabs`, `storage`, `scripting`
+- [ ] Version: the package still says `0.2.3`. The Web Store rejects an upload
+      whose version is not higher than the last one it accepted, so if `0.2.3`
+      was already uploaded on the rejected revision, bump before zipping
 - [ ] Screenshots: `assets/store/screenshot-01.png`, `-02.png`, `-03.png`, 1280x800.
       Regenerate with `node tools/make-screenshots.mjs` after any UI change
 - [ ] Small promo tile: `assets/store/promo-small.png`, 440x280

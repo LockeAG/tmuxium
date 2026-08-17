@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Chrome tmux",
+  "name": "Tmuxium",
   "version": "0.2.3",
   "description": "tmux-style prefix and a vim mode for Chrome.",
   "minimum_chrome_version": "127",
@@ -28,7 +28,7 @@
     "128": "icons/icon-128.png"
   },
   "action": {
-    "default_title": "Chrome tmux",
+    "default_title": "Tmuxium",
     "default_popup": "src/popup.html",
     "default_icon": {
       "16": "icons/icon-16.png",

@@ -1,6 +1,6 @@
 # Privacy policy
 
-**chrome-tmux has no server, and sends nothing to anyone.**
+**Tmuxium has no server, and sends nothing to anyone.**
 
 No analytics, no telemetry, no crash reporting, no account. The extension makes
 no outbound network connection of any kind.

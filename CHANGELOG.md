@@ -3,6 +3,25 @@
 Notable changes, newest first. Follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 loosely and [semantic versioning](https://semver.org/).
 
+## Unreleased
+
+### Changed
+
+- **Renamed to Tmuxium.** The old name put a Google trademark at the head of the
+  extension's own name, which the branding guidelines do not allow without
+  written permission. The store form the guidelines do allow, "X for Google
+  Chrome™", drags a trademark symbol and an attribution line into the
+  description for nothing, so the name drops Chrome instead of managing it.
+  Checked against the Web Store and the wider web before it was picked. The
+  repository, the npm package and the console prefixes keep the old name: they
+  are identifiers, not the product.
+- **The store description no longer lists the default blocked sites by brand.**
+  The Chrome Web Store rejected the submission for keyword spam, quoting that
+  list, and the policy bans excessive third-party names in metadata whatever the
+  intent. The sentence now points at the settings instead, where the list has
+  always been visible and editable. The list itself is unchanged, and the README
+  still names it, since that is documentation rather than store metadata.
+
 ## Planned
 
 For 1.1, once the store listing is approved. Both change the submitted package,
