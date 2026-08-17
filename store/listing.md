@@ -200,11 +200,10 @@ https://github.com/LockeAG/tmuxium/blob/main/PRIVACY.md
 - [ ] Load that zip unpacked once and press the keys. It is a different build
       from the one you have been using: no New Tab Page, and `tabs`, `storage`
       and `scripting` where the repo build also has `topSites` and `favicon`
-- [ ] Check `manifest.json` in the zip says `Tmuxium` and lists exactly
-      `tabs`, `storage`, `scripting`
-- [ ] Version: the package still says `0.2.3`. The Web Store rejects an upload
-      whose version is not higher than the last one it accepted, so if `0.2.3`
-      was already uploaded on the rejected revision, bump before zipping
+- [ ] Check `manifest.json` in the zip says `Tmuxium`, version `0.3.0`, and
+      lists exactly `tabs`, `storage`, `scripting`. Every upload must carry a
+      higher version than the one before it, so never resubmit on the same
+      number, even after a rejection
 - [ ] Screenshots: `assets/store/screenshot-01.png`, `-02.png`, `-03.png`, 1280x800.
       Regenerate with `node tools/make-screenshots.mjs` after any UI change
 - [ ] Small promo tile: `assets/store/promo-small.png`, 440x280
