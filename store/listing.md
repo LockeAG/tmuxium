@@ -106,6 +106,15 @@ Keys typed in the address bar belong to Chrome, not to the page.
 Link hints skip anything inside an iframe. There are no counts like 3j and no
 marks yet.
 
+WHAT'S NEW
+
+0.4.0: every key after the prefix can be rebound in settings, under Keys. The
+help overlay, the tab tree footer and the toolbar popup name the keys you
+actually have. The content script no longer writes to the console of every
+page it loads in.
+
+Full history: https://github.com/LockeAG/tmuxium/blob/main/CHANGELOG.md
+
 Tmuxium is open source, MIT licensed: https://github.com/LockeAG/tmuxium
 ```
 
@@ -202,6 +211,9 @@ https://github.com/LockeAG/tmuxium/blob/main/PRIVACY.md
 - [ ] Load that zip unpacked once and press the keys. It is a different build
       from the one you have been using: no New Tab Page, and `tabs`, `storage`
       and `scripting` where the repo build also has `topSites` and `favicon`
+- [ ] Rewrite WHAT'S NEW in the description for this release: latest version
+      only, a few plain lines, the CHANGELOG link carries the history. The
+      description is the field that has been rejected twice, so it stays short
 - [ ] Check `manifest.json` in the zip says `Tmuxium`, version `0.4.0`, and
       lists exactly `tabs`, `storage`, `scripting`. Every upload must carry a
       higher version than the one before it, so never resubmit on the same
