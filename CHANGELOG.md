@@ -3,6 +3,28 @@
 Notable changes, newest first. Follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 loosely and [semantic versioning](https://semver.org/).
 
+## 0.4.0 - 2026-09-02
+
+Built while 0.3.0 sat in store review. Goes up as the next upload whatever the
+outcome of that review: an approval makes it the first update, a metadata
+rejection makes it the fixed resubmission, since every upload must carry a
+higher version than the last.
+
+### Added
+
+- **Rebindable prefix actions.** Every action after the prefix now has an id,
+  not just a key, so `Ctrl-A` then a letter can be rebound in Settings, under
+  Keys: a button per action showing its current key, click then press the one
+  you want. `?` and `1`-`9` stay fixed, and vim mode's keymap still is not
+  configurable. The help overlay, the tab tree footer and the toolbar popup
+  all draw their key names from what is actually bound, so none of them can
+  describe a key you no longer have.
+
+### Fixed
+
+- The content script no longer writes a line to the console of every page it
+  loads in.
+
 ## 0.3.0 - 2026-08-17
 
 ### Changed
@@ -24,14 +46,9 @@ loosely and [semantic versioning](https://semver.org/).
 
 ## Planned
 
-For 1.1, once the store listing is approved. All three change the submitted
-package, so none goes in while a review is pending.
+For the release after 0.4.0, once the store listing is approved. Both change
+the submitted package, so neither goes in while a review is pending.
 
-- **Rebindable prefix actions.** Every action after the prefix now has an id,
-  not just a key, so `Ctrl-A` then a letter can be rebound in Settings, under
-  Keys: a button per action showing its current key, click then press the one
-  you want. `?` and `1`-`9` stay fixed, and vim mode's keymap still is not
-  configurable.
 - **Search from the tab tree.** `Ctrl-Enter` searches the filter text with the
   configured engine, and the empty state becomes an offer to search rather than
   a dead `No matches`. Not plain `Enter`, which means "switch to the selected

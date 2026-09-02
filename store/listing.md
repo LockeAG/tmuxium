@@ -61,6 +61,8 @@ Prefix, press Ctrl-A then:
   Ctrl-A         jump the caret to the start of the line
   Esc            cancel, having pressed the prefix by mistake
 
+Every key above except ? and 1-9 can be rebound in settings.
+
 Vim mode, bare keys:
   h j k l        scroll
   d u            half a page
@@ -106,11 +108,6 @@ marks yet.
 
 Tmuxium is open source, MIT licensed: https://github.com/LockeAG/tmuxium
 ```
-
-**For 1.1, not now.** Once rebindable keys ships and this listing goes back
-for review, add one sentence after "THE KEYS" in the description above:
-"Every key after the prefix can be rebound in settings." The block above is
-the copy already under review; leave it alone until then.
 
 ---
 
@@ -205,7 +202,7 @@ https://github.com/LockeAG/tmuxium/blob/main/PRIVACY.md
 - [ ] Load that zip unpacked once and press the keys. It is a different build
       from the one you have been using: no New Tab Page, and `tabs`, `storage`
       and `scripting` where the repo build also has `topSites` and `favicon`
-- [ ] Check `manifest.json` in the zip says `Tmuxium`, version `0.3.0`, and
+- [ ] Check `manifest.json` in the zip says `Tmuxium`, version `0.4.0`, and
       lists exactly `tabs`, `storage`, `scripting`. Every upload must carry a
       higher version than the one before it, so never resubmit on the same
       number, even after a rejection
