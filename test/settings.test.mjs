@@ -210,7 +210,10 @@ test('every shipped engine preset is a usable template', () => {
 
 test('malformed stored settings cannot throw or grant a bad prefix', () => {
   const S = loadSettings();
-  assert.deepEqual(S.normalise(null), { prefix: null, disabled: [], search: S.DEFAULT_SEARCH });
+  assert.deepEqual(
+    S.normalise(null),
+    { prefix: null, disabled: [], search: S.DEFAULT_SEARCH, keys: S.defaults().keys }
+  );
   assert.deepEqual(S.normalise({ disabled: 'not-an-array' }).disabled, []);
   assert.equal(S.normalise({ prefix: { code: 'KeyA' } }).prefix, null, 'no modifier means no prefix');
   assert.equal(S.normalise({ prefix: {} }).prefix, null);
@@ -240,6 +243,71 @@ test('sync answering "nothing stored" is authoritative over a stale mirror', asy
   const stale = { get: async () => ({ settings: { disabled: ['deleted.com'] } }), set: async () => {} };
   const S = loadSettings({ sync: { get: async () => ({}), set: async () => {} }, local: stale });
   assert.deepEqual((await S.load()).disabled, S.defaults().disabled, 'the mirror must not win');
+});
+
+test('every default key binding is well formed', () => {
+  const S = loadSettings();
+  const seen = new Set();
+  for (const [id, keys] of S.ACTIONS) {
+    assert.ok(Array.isArray(keys) && keys.length, `${id} needs at least one default key`);
+    for (const key of keys) {
+      assert.match(key, /^[\x20-\x7e]$/, `${id}'s default key must be a plain ASCII character: ${key}`);
+      assert.equal(S.FIXED_KEYS.has(key), false, `${id}'s default ${key} collides with a fixed key`);
+      assert.equal(seen.has(key), false, `${key} is claimed by more than one action`);
+      seen.add(key);
+    }
+  }
+  const defaultKeys = S.defaults().keys;
+  for (const [id] of S.ACTIONS) assert.ok(defaultKeys[id]?.length, `${id} missing from defaults().keys`);
+});
+
+test('normalise fills a missing action and drops unknown ids', () => {
+  const S = loadSettings();
+  const keys = S.normalise({ keys: { create: ['q'], bogus: ['z'] } }).keys;
+  assert.deepEqual(keys.create, ['q'], 'an explicitly stored action is kept');
+  assert.deepEqual(keys.close, ['x'], 'a missing action falls back to its default');
+  assert.equal('bogus' in keys, false, 'an id outside the registry is dropped');
+});
+
+test('normalise drops unusable key candidates', () => {
+  const S = loadSettings();
+  const keys = S.normalise({ keys: { create: ['ñ', 'ab', ' ', '?', '5', 'q'] } }).keys;
+  assert.deepEqual(keys.create, ['q'], 'only the one usable candidate survives');
+});
+
+test('a key claimed twice goes to the earlier action in registry order', () => {
+  const S = loadSettings();
+  const keys = S.normalise({ keys: { create: ['x'], close: ['x'] } }).keys;
+  assert.deepEqual(keys.create, ['x'], 'create comes first in ACTIONS');
+  assert.deepEqual(keys.close, [], 'close has no other default to fall back to, so it goes unbound');
+
+  const withFallback = S.normalise({ keys: { switcher: ['b'], last: ['b'] } }).keys;
+  assert.deepEqual(withFallback.switcher, ['b']);
+  assert.deepEqual(withFallback.last, ['l'], 'last falls back to its other default, l, since b is taken');
+});
+
+test('actionFor matches case exactly', () => {
+  const S = loadSettings();
+  const keys = S.defaults().keys;
+  assert.equal(S.actionFor(keys, 'x'), 'close');
+  assert.equal(S.actionFor(keys, 'X'), null, 'X is not bound to anything by default');
+});
+
+test('a malformed keys map cannot throw and falls back to defaults', () => {
+  const S = loadSettings();
+  for (const bad of ['garbage', ['a', 'b'], null, 42, undefined]) {
+    assert.doesNotThrow(() => S.normalise({ keys: bad }));
+    assert.deepEqual(S.normalise({ keys: bad }).keys, S.defaults().keys);
+  }
+});
+
+test('keyProblem names the three ways a key can be unusable', () => {
+  const S = loadSettings();
+  const keys = S.defaults().keys;
+  assert.equal(S.keyProblem(keys, 'create', 'ab'), 'invalid');
+  assert.equal(S.keyProblem(keys, 'create', '?'), 'fixed');
+  assert.equal(S.keyProblem(keys, 'create', 'x'), 'already used by close tab');
+  assert.equal(S.keyProblem(keys, 'create', 'q'), null, 'a free key is fine');
 });
 
 test('a storage failure keeps the blocklist rather than assuming it is empty', async () => {

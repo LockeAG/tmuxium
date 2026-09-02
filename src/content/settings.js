@@ -25,10 +25,17 @@
  */
 
 /**
+ * The id of a prefix action. Order in `ACTIONS` is help order and conflict
+ * priority: when stored data disagrees, the earlier id wins a contested key.
+ * @typedef {'switcher' | 'windows' | 'last' | 'prev' | 'next' | 'call' | 'create' | 'close' | 'vim' | 'settings'} ActionId
+ */
+
+/**
  * @typedef {object} Settings
  * @property {Prefix | null} prefix null means "whatever suits this platform"
  * @property {string[]} disabled host patterns where the extension stays out
  * @property {string} search a search URL template with %s where the query goes
+ * @property {Record<ActionId, string[]>} keys keys bound to each prefix action
  */
 
 globalThis.SV_SETTINGS = (() => {
@@ -84,6 +91,28 @@ globalThis.SV_SETTINGS = (() => {
 
   const DEFAULT_SEARCH = ENGINES[0][1];
 
+  // id, default keys, help text. Order is help order and conflict priority.
+  // The `create` id deliberately avoids the word this project cannot ship:
+  // tools/build-store.cjs fails the store build on that substring anywhere in
+  // dist/, case-sensitively, since it names the page the store build drops.
+  /** @type {Array<[ActionId, string[], string]>} */
+  const ACTIONS = [
+    ['switcher', ['o', 'w'], 'tab tree, searchable across every window'],
+    ['windows', ['s'], 'the same tree, collapsed to windows'],
+    ['last', ['b', 'l'], 'toggle to the last tab you were on'],
+    ['prev', ['p'], 'previous tab in order'],
+    ['next', ['n'], 'next tab in order'],
+    ['call', ['m'], 'jump to a call, cycles if several'],
+    ['create', ['c'], 'new tab'],
+    ['close', ['x'], 'close tab'],
+    ['vim', ['v'], 'toggle vim mode'],
+    ['settings', [','], 'settings: prefix, keys and per-site opt-out']
+  ];
+
+  // Digits and `?` stay out of the registry: they are jump-to-tab and help,
+  // and neither is worth rebinding.
+  const FIXED_KEYS = new Set(['?', '1', '2', '3', '4', '5', '6', '7', '8', '9']);
+
   /**
    * A usable template is an http(s) URL with a %s to drop the query into.
    * @param {any} input
@@ -114,7 +143,7 @@ globalThis.SV_SETTINGS = (() => {
 
   /** @returns {Settings} */
   function defaults() {
-    return { prefix: null, disabled: [...DEFAULT_DISABLED], search: DEFAULT_SEARCH };
+    return { prefix: null, disabled: [...DEFAULT_DISABLED], search: DEFAULT_SEARCH, keys: normaliseKeys(undefined) };
   }
 
   /** @param {Settings} settings @returns {Prefix} */
@@ -184,7 +213,69 @@ globalThis.SV_SETTINGS = (() => {
       ? source.disabled.map(normaliseHost).filter(Boolean)
       : [];
 
-    return { prefix, disabled, search: normaliseSearch(source.search) };
+    return { prefix, disabled, search: normaliseSearch(source.search), keys: normaliseKeys(source.keys) };
+  }
+
+  /**
+   * Every action gets a list of currently bound keys: filled from its own
+   * defaults where nothing usable was stored, and with a key already claimed
+   * by an earlier action, in registry order, dropped from a later one. An
+   * action left with nothing takes any of its own defaults not already
+   * spoken for; failing that it stays empty, shown as unbound. Storage is
+   * shared across machines and versions, so nothing here may throw.
+   * @param {any} input
+   * @returns {Record<ActionId, string[]>}
+   */
+  function normaliseKeys(input) {
+    const raw = input && typeof input === 'object' && !Array.isArray(input) ? input : {};
+    const claimed = new Set();
+    /** @type {Record<string, string[]>} */
+    const result = {};
+
+    for (const [id, fallback] of ACTIONS) {
+      const stored = raw[id];
+      const requested = Array.isArray(stored)
+        ? stored.filter((key) => isPlainKey(key) && !/\s/.test(key) && !FIXED_KEYS.has(key))
+        : fallback;
+
+      let keys = [...new Set(requested.filter((key) => !claimed.has(key)))];
+      if (!keys.length) keys = fallback.filter((key) => !claimed.has(key));
+
+      keys.forEach((key) => claimed.add(key));
+      result[id] = keys;
+    }
+
+    return /** @type {Record<ActionId, string[]>} */ (result);
+  }
+
+  /**
+   * The rule `normaliseKeys` applies to one candidate, so the options page can
+   * show the same verdict before save rather than after.
+   * @param {Record<ActionId, string[]>} keys the keys as they stand, before this change
+   * @param {ActionId} actionId the action being bound
+   * @param {string} key
+   * @returns {string | null} null when the key may be bound
+   */
+  function keyProblem(keys, actionId, key) {
+    if (!isPlainKey(key) || /\s/.test(key)) return 'invalid';
+    if (FIXED_KEYS.has(key)) return 'fixed';
+    for (const [id, , description] of ACTIONS) {
+      if (id === actionId) continue;
+      if ((keys[id] ?? []).includes(key)) return `already used by ${description}`;
+    }
+    return null;
+  }
+
+  /**
+   * @param {Record<ActionId, string[]>} keys
+   * @param {string} key
+   * @returns {ActionId | null}
+   */
+  function actionFor(keys, key) {
+    for (const [id] of ACTIONS) {
+      if ((keys[id] ?? []).includes(key)) return id;
+    }
+    return null;
   }
 
   /**
@@ -344,8 +435,9 @@ globalThis.SV_SETTINGS = (() => {
   }
 
   return {
-    KEY, DEFAULT_DISABLED, ENGINES, DEFAULT_SEARCH, defaults, normalise, normaliseHost,
-    normaliseSearch, searchUrl, engineName, platformPrefix, effectivePrefix, actionKey,
-    load, save, matches, disabledFor, label, fromEvent, isReserved, isMac
+    KEY, DEFAULT_DISABLED, ENGINES, DEFAULT_SEARCH, ACTIONS, FIXED_KEYS, defaults, normalise,
+    normaliseHost, normaliseSearch, searchUrl, engineName, platformPrefix, effectivePrefix,
+    actionKey, keyProblem, actionFor, load, save, matches, disabledFor, label, fromEvent,
+    isReserved, isMac, MODIFIER_CODES
   };
 })();
