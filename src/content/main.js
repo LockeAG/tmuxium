@@ -445,5 +445,4 @@
   reload();
 
   globalThis.__TMUXIUM__ = { retire };
-  console.log('[tmuxium] content script ready');
 })();
