@@ -24,9 +24,15 @@ loosely and [semantic versioning](https://semver.org/).
 
 ## Planned
 
-For 1.1, once the store listing is approved. Both change the submitted package,
-so neither goes in while a review is pending.
+For 1.1, once the store listing is approved. All three change the submitted
+package, so none goes in while a review is pending.
 
+- **Rebindable prefix actions.** Every action after the prefix now has an id,
+  not just a key, so `Ctrl-A` then a letter can be rebound in Settings, under
+  Keys: a button per action showing its current key, click then press the one
+  you want. `?` and `1`-`9` stay fixed, and vim mode's keymap still is not
+  configurable. Built on a branch; nothing in the shipped package changes
+  until 1.1.
 - **Search from the tab tree.** `Ctrl-Enter` searches the filter text with the
   configured engine, and the empty state becomes an offer to search rather than
   a dead `No matches`. Not plain `Enter`, which means "switch to the selected

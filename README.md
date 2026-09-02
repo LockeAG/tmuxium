@@ -41,7 +41,8 @@ start working straight away.
 ## Prefix
 
 Press `Ctrl-A`, let go, then one of these. `-- PREFIX --` shows bottom-left while
-it waits. No timeout, same as tmux.
+it waits. No timeout, same as tmux. Every key below except `?` and `1`-`9` can
+be rebound in Settings, under Keys.
 
 | Key | What it does |
 | --- | --- |
@@ -113,6 +114,11 @@ Windows and Linux. Set one deliberately and it syncs everywhere, which is what
 you want only if you use the same key on every machine. The site list always
 syncs.
 
+**Keys.** Click the button next to an action and press the key you want.
+Modifiers are ignored once the prefix has fired, so `Ctrl-X` and `x` bind the
+same key. One key per action, and setting a new one replaces the old. `?` and
+`1`-`9` stay fixed.
+
 **Search engine.** Used by the new tab page. Pick a preset or write your own
 URL with `%s` where the query goes.
 
@@ -147,7 +153,8 @@ takes focus back as it loads. If one ever ignores you, click it once.
   Binding a browser-level shortcut makes it worse, not better: Chrome would then
   swallow the prefix before any page sees it.
 - Keys in the omnibox belong to Chrome, not to the page.
-- The keymap beyond the prefix is not configurable; it lives in the source.
+- Vim mode's keymap is not configurable; it lives in the source. Prefix
+  actions are, in Settings under Keys.
 - Link hints skip iframes. Find uses `window.find`, old and unofficial.
 - No counts like `3j`, no marks.
 - Teams only matches its join page; it rewrites the URL once you are in a call.

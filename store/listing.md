@@ -107,6 +107,11 @@ marks yet.
 Tmuxium is open source, MIT licensed: https://github.com/LockeAG/tmuxium
 ```
 
+**For 1.1, not now.** Once rebindable keys ships and this listing goes back
+for review, add one sentence after "THE KEYS" in the description above:
+"Every key after the prefix can be rebound in settings." The block above is
+the copy already under review; leave it alone until then.
+
 ---
 
 ## Privacy practices
