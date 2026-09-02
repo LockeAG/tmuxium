@@ -5,6 +5,8 @@
    block them the way it blocks an injected <style> element. */
 
 globalThis.SV_UI = (() => {
+  const CONFIG = globalThis.SV_SETTINGS;
+
   const CSS = `
     :host { all: initial; }
     * { box-sizing: border-box; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
@@ -222,7 +224,7 @@ globalThis.SV_UI = (() => {
     if (restore?.isConnected) restore.focus({ preventScroll: true });
   }
 
-  function openSwitcher({ groups, activeTabId, collapsed, prefixLabel = 'C-a' }, onPick, onClose) {
+  function openSwitcher({ groups, activeTabId, collapsed, prefixLabel = 'C-a', settingsKey }, onPick, onClose) {
     closeSwitcher();
     // Identity for this overlay, so work still in flight cannot act on a later one.
     const token = {};
@@ -246,10 +248,13 @@ globalThis.SV_UI = (() => {
     list.id = 'sv-list';
     list.setAttribute('role', 'listbox');
     search.setAttribute('aria-controls', list.id);
+    // Omitted entirely if settings has no key bound, rather than naming one
+    // that does not exist.
+    const settingsHint = settingsKey ? ` · ${prefixLabel} ${settingsKey} settings` : '';
     const footer = el(
       'div',
       'footer',
-      `Enter switch · Ctrl-J/Ctrl-K move · Ctrl-X close tab · Tab windows · Esc · ${prefixLabel} , settings`
+      `Enter switch · Ctrl-J/Ctrl-K move · Ctrl-X close tab · Tab windows · Esc${settingsHint}`
     );
 
     panel.append(search, list, footer);
@@ -442,24 +447,29 @@ globalThis.SV_UI = (() => {
 
   /* Help */
 
-  /** @type {Array<[string, Array<[string, string]>]>} */
-  const KEYMAP = [
-    ['Prefix', [
-      ['C-a Ctrl-O / o / w', 'tab tree, searchable across every window'],
-      ['C-a s', 'the same tree, collapsed to windows'],
-      ['C-a b / l', 'toggle to the last tab you were on'],
-      ['C-a p', 'previous tab in order'],
-      ['C-a n', 'next tab in order'],
+  /**
+   * The prefix section is rebuilt on every call, since the keys behind it can
+   * change without a page reload. Rows for fixed keys stay literal: digits,
+   * `?` and the two prefix-only bindings are never in the registry.
+   * @param {Record<ActionId, string[]>} keys
+   * @returns {Array<[string, string]>}
+   */
+  function prefixRows(keys) {
+    const rows = CONFIG.ACTIONS.map(([id, , description]) => {
+      const bound = keys[id] ?? [];
+      return [`C-a ${bound.length ? bound.join(' / ') : '(unbound)'}`, description];
+    });
+    rows.push(
       ['C-a 1-9', 'jump to tab by position'],
-      ['C-a m', 'jump to a call, cycles if several'],
-      ['C-a c', 'new tab'],
-      ['C-a x', 'close tab'],
-      ['C-a v', 'toggle vim mode'],
-      ['C-a ,', 'settings: prefix and per-site opt-out'],
       ['C-a ?', 'this help'],
       ['C-a C-a', 'move caret to line start'],
       ['C-a Esc', 'cancel the prefix']
-    ]],
+    );
+    return rows;
+  }
+
+  /** @type {Array<[string, Array<[string, string]>]>} */
+  const FIXED_KEYMAP = [
     ['Vim mode', [
       ['h j k l', 'scroll'],
       ['d / u', 'half page down / up'],
@@ -490,8 +500,11 @@ globalThis.SV_UI = (() => {
     if (restore?.isConnected) restore.focus({ preventScroll: true });
   }
 
-  /** @param {string} [prefixLabel] */
-  function openHelp(prefixLabel = 'C-a') {
+  /**
+   * @param {string} [prefixLabel]
+   * @param {Record<ActionId, string[]>} [keys]
+   */
+  function openHelp(prefixLabel = 'C-a', keys = /** @type {any} */ ({})) {
     closeHelp();
     const r = ensureRoot();
 
@@ -503,14 +516,16 @@ globalThis.SV_UI = (() => {
     panel.tabIndex = -1;
     const body = el('div', 'help');
 
-    KEYMAP.forEach(([title, rows]) => {
+    /** @type {Array<[string, Array<[string, string]>]>} */
+    const sections = [['Prefix', prefixRows(keys)], ...FIXED_KEYMAP];
+    sections.forEach(([title, rows]) => {
       const section = el('section');
       section.append(el('h3', null, title));
       const list = el('dl');
-      rows.forEach(([keys, description]) => {
-        // KEYMAP is written with C-a, but the prefix is rebindable, so a
+      rows.forEach(([label, description]) => {
+        // Every row is written with C-a, but the prefix is rebindable, so a
         // hardcoded help screen would be wrong for anyone who changed it.
-        list.append(el('dt', null, keys.replaceAll('C-a', prefixLabel)), el('dd', null, description));
+        list.append(el('dt', null, label.replaceAll('C-a', prefixLabel)), el('dd', null, description));
       });
       section.append(list);
       body.append(section);

@@ -198,6 +198,49 @@ test('the overlays name the prefix the user actually set', async ({ context, wor
     .toBe('^A', 'the rebound prefix arms');
 });
 
+test('the help overlay names the rebound key', async ({ context, worker, site }) => {
+  // Rebind close away from its default x, so a hardcoded x in the help
+  // screen would give the test away.
+  await worker.evaluate(() =>
+    chrome.storage.sync.set({
+      settings: {
+        prefix: { ctrl: true, alt: false, shift: false, meta: false, code: 'KeyA' },
+        disabled: [],
+        keys: { close: ['q'] }
+      }
+    })
+  );
+
+  const page = await context.newPage();
+  await page.goto(site);
+  await page.locator('body').click();
+  await page.waitForTimeout(300);
+
+  await page.keyboard.press('Control+a');
+  await page.keyboard.press('?');
+  await page.waitForTimeout(300);
+
+  // The overlay lives in a closed shadow root, invisible to page JS and so to
+  // ordinary locators too. CDP can still see it, the same way DevTools can.
+  const cdp = await context.newCDPSession(page);
+  const { root } = await cdp.send('DOM.getDocument', { depth: -1, pierce: true });
+
+  /** @param {any} node @param {string[]} out */
+  function collectText(node, out) {
+    if (node.nodeValue) out.push(node.nodeValue);
+    for (const child of node.children ?? []) collectText(child, out);
+    for (const shadow of node.shadowRoots ?? []) collectText(shadow, out);
+  }
+
+  const texts = [];
+  collectText(root, texts);
+  const flat = texts.join(' ');
+
+  // CONFIG.label() spells the pinned prefix out as Ctrl-A, not C-a.
+  expect(flat).toContain('Ctrl-A q');
+  expect(flat).toContain('close tab');
+});
+
 test('the tab tree announces itself to a screen reader', async ({ context, worker, site, prefix }) => {
   const page = await context.newPage();
   await page.goto(site);

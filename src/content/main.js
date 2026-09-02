@@ -320,7 +320,7 @@
       // Help is drawn in the page, so it needs no round trip.
       if (key === '?') {
         send({ type: 'disarm' });
-        UI.openHelp(CONFIG.label(prefix));
+        UI.openHelp(CONFIG.label(prefix), settings.keys);
         return;
       }
 
@@ -378,7 +378,7 @@
         if (blocked) break;
         setArmed(false);
         UI.openSwitcher(
-          { ...message, prefixLabel: CONFIG.label(prefix) },
+          { ...message, prefixLabel: CONFIG.label(prefix), settingsKey: settings.keys.settings[0] },
           (target) => send({ type: 'pick', ...target }),
           (tabId) => send({ type: 'close', tabId })
         );
