@@ -120,6 +120,43 @@ test('the prefix runs an action', async ({ context, worker, site, prefix }) => {
     .toBe(before + 1);
 });
 
+test('a rebound key runs its action, and the old key does not', async ({ context, worker, site }) => {
+  // Not `close`: closing the page under test would kill the Playwright page
+  // mid-assertion.
+  await worker.evaluate(() =>
+    chrome.storage.sync.set({
+      settings: {
+        prefix: { ctrl: true, alt: false, shift: false, meta: false, code: 'KeyA' },
+        disabled: [],
+        keys: { create: ['q'] }
+      }
+    })
+  );
+
+  const page = await context.newPage();
+  await page.goto(site);
+  await page.locator('body').click();
+
+  const before = await worker.evaluate(async () => (await chrome.tabs.query({})).length);
+  await page.keyboard.press('Control+a');
+  await page.keyboard.press('q');
+
+  // `C-a q` now opens a tab: the rebound `create` key.
+  await expect
+    .poll(() => worker.evaluate(async () => (await chrome.tabs.query({})).length))
+    .toBe(before + 1);
+
+  await page.bringToFront();
+  await page.locator('body').click();
+  const afterRebind = await worker.evaluate(async () => (await chrome.tabs.query({})).length);
+  await page.keyboard.press('Control+a');
+  await page.keyboard.press('c');
+  await page.waitForTimeout(300);
+
+  // The old key is free: no tab opens.
+  expect(await worker.evaluate(async () => (await chrome.tabs.query({})).length)).toBe(afterRebind);
+});
+
 test('vim mode toggles and shows in the badge', async ({ context, worker, site, prefix }) => {
   const page = await context.newPage();
   await page.goto(site);

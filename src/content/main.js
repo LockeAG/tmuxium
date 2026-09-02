@@ -27,6 +27,19 @@
   // Assume disabled until the settings arrive, and stay that way if they never
   // do. A site the user switched off must never fire because storage hiccupped.
   let blocked = true;
+  // Rebuilt whenever settings change, so a live rebind takes effect on the
+  // next keypress without anything extra to wire up.
+  /** @type {Map<string, ActionId>} */
+  let keyToAction = buildKeyToAction(settings.keys);
+
+  /** @param {Record<ActionId, string[]>} keys @returns {Map<string, ActionId>} */
+  function buildKeyToAction(keys) {
+    const map = new Map();
+    for (const [id, list] of Object.entries(keys)) {
+      for (const key of list) map.set(key, /** @type {ActionId} */ (id));
+    }
+    return map;
+  }
 
   /** @type {'off' | 'vim'} */
   let mode = 'off';
@@ -301,13 +314,30 @@
         send({ type: 'disarm' });
         return;
       }
+
+      const key = CONFIG.actionKey(event.key, event.code, event.shiftKey);
+
       // Help is drawn in the page, so it needs no round trip.
-      if (CONFIG.actionKey(event.key, event.code, event.shiftKey) === '?') {
+      if (key === '?') {
         send({ type: 'disarm' });
         UI.openHelp(CONFIG.label(prefix));
         return;
       }
-      send({ type: 'armedKey', key: CONFIG.actionKey(event.key, event.code, event.shiftKey) }).then((response) => {
+
+      // Digits are fixed, never in the registry: jump straight by position.
+      if (/^[1-9]$/.test(key)) {
+        send({ type: 'action', action: 'jump', index: Number(key) }).then((response) => {
+          if (response?.mode) setMode(response.mode);
+        });
+        return;
+      }
+
+      const action = keyToAction.get(key);
+      if (!action) {
+        send({ type: 'disarm' });
+        return;
+      }
+      send({ type: 'action', action }).then((response) => {
         if (response?.mode) setMode(response.mode);
       });
       return;
@@ -381,6 +411,7 @@
     settings = next;
     prefix = CONFIG.effectivePrefix(next);
     blocked = CONFIG.disabledFor(next.disabled, location.hostname);
+    keyToAction = buildKeyToAction(next.keys);
 
     if (blocked) standDown();
     else handshake();

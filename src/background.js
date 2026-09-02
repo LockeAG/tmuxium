@@ -186,44 +186,44 @@ async function focusTab(tabId) {
 }
 
 /**
- * @param {string} key
+ * The content script resolves a keypress to an action id, since it is the
+ * only side that knows the user's settings. This switches on that id, never
+ * on the raw key.
+ * @param {string} action
+ * @param {number | undefined} index for `jump`, 1-based
  * @param {chrome.tabs.Tab} tab
  * @param {TabState} state
  * @returns {Promise<TabState>}
  */
-async function runPrefixAction(key, tab, state) {
-  switch (key) {
-    // `o` mirrors the tmux session picker on C-a C-o. Ctrl+O reaches here as
-    // plain `o`, so the modified and unmodified forms are the same key.
-    case 'o':
-    case 'w':
-    case 's':
+async function runPrefixAction(action, index, tab, state) {
+  switch (action) {
+    case 'switcher':
+    case 'windows':
       send(tab.id, {
         type: 'switcher',
-        collapsed: key === 's',
+        collapsed: action === 'windows',
         activeTabId: tab.id,
         groups: await collectWindows()
       });
       return state;
 
     // tmux last-window: toggle between the two tabs you were last on.
-    case 'b':
-    case 'l': {
+    case 'last': {
       const previous = await previousTab(tab.windowId);
       if (previous !== null) await chrome.tabs.update(previous, { active: true }).catch(() => null);
       return state;
     }
 
-    case 'n':
+    case 'next':
       await cycleTab(tab, 1);
       return state;
 
-    case 'p':
+    case 'prev':
       await cycleTab(tab, -1);
       return state;
 
     // Jump straight to the call. With more than one, cycle through them.
-    case 'm': {
+    case 'call': {
       const calls = (await chrome.tabs.query({})).filter((t) => isCall(t.url));
       if (!calls.length) return state;
       const at = calls.findIndex((t) => t.id === tab.id);
@@ -232,30 +232,33 @@ async function runPrefixAction(key, tab, state) {
       return state;
     }
 
-    case 'c':
+    case 'create':
       await chrome.tabs.create({ windowId: tab.windowId });
       return state;
 
-    case 'x':
+    case 'close':
       if (tab.id !== undefined) await chrome.tabs.remove(tab.id);
       return { ...state, closed: true };
 
-    case 'v':
+    case 'vim':
       return { ...state, mode: state.mode === 'vim' ? 'off' : 'vim' };
 
-    // Comma is settings nearly everywhere on macOS.
-    case ',':
+    case 'settings':
       chrome.runtime.openOptionsPage();
       return state;
 
-    default: {
-      if (/^[1-9]$/.test(key)) {
-        const tabs = await chrome.tabs.query({ windowId: tab.windowId });
-        const target = tabs[Number(key) - 1];
-        if (target) await chrome.tabs.update(target.id, { active: true });
-      }
+    // Digits are fixed, never in the registry, so the content script sends
+    // them as their own action with the position rather than a key.
+    case 'jump': {
+      if (index === undefined) return state;
+      const tabs = await chrome.tabs.query({ windowId: tab.windowId });
+      const target = tabs[index - 1];
+      if (target) await chrome.tabs.update(target.id, { active: true });
       return state;
     }
+
+    default:
+      return state;
   }
 }
 
@@ -280,11 +283,11 @@ async function handle(message, sender) {
       return { mode: state.mode };
     }
 
-    case 'armedKey': {
+    case 'action': {
       // No expiry check: the content script owns the timing on both paths and
-      // will not send a key it considers stale.
+      // will not send an action it considers stale.
       const state = await getState(tab.id);
-      const next = await runPrefixAction(message.key, tab, state);
+      const next = await runPrefixAction(message.action, message.index, tab, state);
       if (next.closed) {
         // Do not resurrect state for a tab we just removed.
         await chrome.storage.session.remove(tabKey(tab.id));

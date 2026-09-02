@@ -96,46 +96,32 @@ test('a page using the settings global loads settings.js', () => {
   }
 });
 
-test('every prefix key in the help is implemented, and the other way round', () => {
-  const ui = read('src/content/ui.js');
+test('every registered action is implemented, and the other way round', () => {
+  // The prefix help used to be a static table matched against the worker's
+  // raw-key cases. Both are generated from the action registry now, so the
+  // coupling that matters moved: settings.js's ACTIONS against the ids
+  // runPrefixAction actually switches on.
+  const settings = read('src/content/settings.js');
   const background = read('src/background.js');
 
-  const keymap = ui.match(/const KEYMAP = \[([\s\S]*?)\n {2}\];/);
-  assert.ok(keymap, 'could not find KEYMAP in ui.js');
+  const actions = settings.match(/const ACTIONS = \[([\s\S]*?)\n {2}\];/);
+  assert.ok(actions, 'could not find ACTIONS in settings.js');
+  const registered = new Set([...actions[1].matchAll(/\['(\w+)', \[/g)].map((m) => m[1]));
+  assert.ok(registered.size, 'found no action ids in ACTIONS');
 
-  // Rows look like ['C-a b / l', '…']. Take the keys, drop the prefix itself.
-  const documented = new Set();
-  for (const [, keys] of keymap[1].matchAll(/\['(C-a [^']+)'/g)) {
-    for (const part of keys.replace('C-a ', '').split(' / ')) {
-      // Ctrl-O reaches the worker as a bare `o`, so Ctrl-O and o are one key.
-      const raw = part.trim();
-      const stripped = raw.replace(/^(Ctrl|C)-/i, '');
-      const key = stripped === raw ? raw : stripped.toLowerCase();
-      if (key && key !== 'a' && key.toLowerCase() !== 'esc') documented.add(key);
-    }
+  const body = background.match(/async function runPrefixAction\([^)]*\) \{([\s\S]*?)\n\}/);
+  assert.ok(body, 'could not find runPrefixAction in background.js');
+  const implemented = new Set([...body[1].matchAll(/^\s{4}case '(\w+)':/gm)].map((m) => m[1]));
+
+  // Digits are fixed, never in the registry: the worker handles them as their
+  // own action rather than a case per key.
+  const fixed = new Set(['jump']);
+
+  for (const id of registered) {
+    assert.ok(implemented.has(id), `ACTIONS lists ${id} but the worker has no case for it`);
   }
-
-  // Handled in the page, never sent to the worker.
-  const local = new Set(['?']);
-  // Ranges the worker matches with a regex rather than a case.
-  const ranged = new Set(['1-9']);
-
-  const implemented = new Set(
-    [...background.matchAll(/^\s{4}case '(.)':/gm)].map((m) => m[1])
-  );
-
-  for (const key of documented) {
-    if (local.has(key) || ranged.has(key)) continue;
-    assert.ok(
-      implemented.has(key),
-      `the help lists C-a ${key} but the worker has no case for it`
-    );
-  }
-
-  for (const key of implemented) {
-    assert.ok(
-      documented.has(key) || local.has(key),
-      `the worker handles C-a ${key} but the help does not mention it`
-    );
+  for (const id of implemented) {
+    if (fixed.has(id)) continue;
+    assert.ok(registered.has(id), `the worker handles ${id} but it is not in ACTIONS`);
   }
 });
