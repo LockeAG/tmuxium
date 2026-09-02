@@ -27,19 +27,6 @@
   // Assume disabled until the settings arrive, and stay that way if they never
   // do. A site the user switched off must never fire because storage hiccupped.
   let blocked = true;
-  // Rebuilt whenever settings change, so a live rebind takes effect on the
-  // next keypress without anything extra to wire up.
-  /** @type {Map<string, ActionId>} */
-  let keyToAction = buildKeyToAction(settings.keys);
-
-  /** @param {Record<ActionId, string[]>} keys @returns {Map<string, ActionId>} */
-  function buildKeyToAction(keys) {
-    const map = new Map();
-    for (const [id, list] of Object.entries(keys)) {
-      for (const key of list) map.set(key, /** @type {ActionId} */ (id));
-    }
-    return map;
-  }
 
   /** @type {'off' | 'vim'} */
   let mode = 'off';
@@ -332,7 +319,8 @@
         return;
       }
 
-      const action = keyToAction.get(key);
+      // Settings are live, so a rebind takes effect on the next keypress.
+      const action = CONFIG.actionFor(settings.keys, key);
       if (!action) {
         send({ type: 'disarm' });
         return;
@@ -411,7 +399,6 @@
     settings = next;
     prefix = CONFIG.effectivePrefix(next);
     blocked = CONFIG.disabledFor(next.disabled, location.hostname);
-    keyToAction = buildKeyToAction(next.keys);
 
     if (blocked) standDown();
     else handshake();

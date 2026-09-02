@@ -114,6 +114,14 @@ globalThis.SV_SETTINGS = (() => {
   const FIXED_KEYS = new Set(['?', '1', '2', '3', '4', '5', '6', '7', '8', '9']);
 
   /**
+   * The character domain a binding lives in: exactly what `actionKey` can
+   * return, minus whitespace. One definition, so the options page and the
+   * normaliser can never disagree about what counts as a key.
+   * @param {any} key
+   */
+  const isKeyChar = (key) => isPlainKey(key) && !/\s/.test(key);
+
+  /**
    * A usable template is an http(s) URL with a %s to drop the query into.
    * @param {any} input
    * @returns {string}
@@ -235,7 +243,7 @@ globalThis.SV_SETTINGS = (() => {
     for (const [id, fallback] of ACTIONS) {
       const stored = raw[id];
       const requested = Array.isArray(stored)
-        ? stored.filter((key) => isPlainKey(key) && !/\s/.test(key) && !FIXED_KEYS.has(key))
+        ? stored.filter((key) => isKeyChar(key) && !FIXED_KEYS.has(key))
         : fallback;
 
       let keys = [...new Set(requested.filter((key) => !claimed.has(key)))];
@@ -257,7 +265,7 @@ globalThis.SV_SETTINGS = (() => {
    * @returns {string | null} null when the key may be bound
    */
   function keyProblem(keys, actionId, key) {
-    if (!isPlainKey(key) || /\s/.test(key)) return 'invalid';
+    if (!isKeyChar(key)) return 'invalid';
     if (FIXED_KEYS.has(key)) return 'fixed';
     for (const [id, , description] of ACTIONS) {
       if (id === actionId) continue;

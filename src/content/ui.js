@@ -504,7 +504,7 @@ globalThis.SV_UI = (() => {
    * @param {string} [prefixLabel]
    * @param {Record<ActionId, string[]>} [keys]
    */
-  function openHelp(prefixLabel = 'C-a', keys = /** @type {any} */ ({})) {
+  function openHelp(prefixLabel = 'C-a', keys = CONFIG.defaults().keys) {
     closeHelp();
     const r = ensureRoot();
 

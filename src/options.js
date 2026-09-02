@@ -74,9 +74,10 @@ const keyRows = CONFIG.ACTIONS.map(([id, , description]) => {
 
     const key = CONFIG.actionKey(event.key, event.code, event.shiftKey);
     const problem = CONFIG.keyProblem(current.keys, id, key);
+    // Stay in capture and say why, the way the prefix button does for a key
+    // Chrome keeps, so the next press can be the right one.
     if (problem) {
       keyNotes[id] = problem;
-      capturingKey = null;
       renderKeys();
       return;
     }
