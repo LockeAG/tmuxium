@@ -19,6 +19,89 @@ let capturing = false;
 // push the wipe to every machine.
 let degraded = false;
 
+/* Keys: one row per registry action, built once so a click can keep focus
+   through its own re-render, the same problem the prefix button does not
+   have because it is a single persistent element. */
+
+const keysContainer = document.getElementById('keys');
+/** @type {ActionId | null} action being captured, or null */
+let capturingKey = null;
+/** @type {Record<string, string>} the last problem shown per action, if any */
+const keyNotes = {};
+
+/** @type {Array<{ id: ActionId, button: HTMLButtonElement, note: HTMLElement }>} */
+const keyRows = CONFIG.ACTIONS.map(([id, , description]) => {
+  const row = document.createElement('div');
+  row.className = 'key-row';
+
+  const label = document.createElement('span');
+  label.className = 'key-desc';
+  label.textContent = description;
+
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.dataset.action = id;
+  button.setAttribute('aria-label', `${description}, click then press a key`);
+
+  const note = document.createElement('span');
+  note.className = 'note';
+
+  button.addEventListener('click', () => {
+    capturingKey = id;
+    keyNotes[id] = '';
+    renderKeys();
+  });
+
+  button.addEventListener('blur', () => {
+    if (capturingKey !== id) return;
+    capturingKey = null;
+    renderKeys();
+  });
+
+  button.addEventListener('keydown', (event) => {
+    if (capturingKey !== id) return;
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (event.key === 'Escape') {
+      capturingKey = null;
+      renderKeys();
+      return;
+    }
+    // Shift alone on the way to Shift-X must not flash "invalid" before the
+    // X lands, the same guard main.js applies while armed.
+    if (CONFIG.MODIFIER_CODES.test(event.code)) return;
+
+    const key = CONFIG.actionKey(event.key, event.code, event.shiftKey);
+    const problem = CONFIG.keyProblem(current.keys, id, key);
+    if (problem) {
+      keyNotes[id] = problem;
+      capturingKey = null;
+      renderKeys();
+      return;
+    }
+
+    current = { ...current, keys: { ...current.keys, [id]: [key] } };
+    capturingKey = null;
+    keyNotes[id] = '';
+    renderKeys();
+  });
+
+  row.append(label, button, note);
+  keysContainer?.append(row);
+  return { id, button, note };
+});
+
+function renderKeys() {
+  for (const { id, button, note } of keyRows) {
+    const bound = current.keys[id] ?? [];
+    button.textContent = capturingKey === id
+      ? 'press a key…'
+      : bound.length ? bound.join(' / ') : '(unbound)';
+    note.textContent = keyNotes[id] ?? '';
+  }
+}
+
 function renderEngine() {
   if (!engineSelect || !customInput) return;
   if (!engineSelect.options.length) {
@@ -33,6 +116,7 @@ function renderEngine() {
 
 function render() {
   renderEngine();
+  renderKeys();
   const prefix = CONFIG.effectivePrefix(current);
   prefixButton.textContent = capturing ? 'press a key…' : CONFIG.label(prefix);
 
@@ -153,6 +237,9 @@ document.getElementById('reset')?.addEventListener('click', async () => {
     return;
   }
   degraded = false;
+  // A note from before the reset would now describe a key nobody is trying
+  // to bind any more.
+  for (const id of Object.keys(keyNotes)) delete keyNotes[id];
   // defaults() ships a blocklist, so an empty box here would lie about what is
   // now stored and synced to every machine.
   disabledBox.value = current.disabled.join('\n');

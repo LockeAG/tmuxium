@@ -59,6 +59,22 @@
       }
       #prefix:focus { border-color: var(--accent); color: var(--accent); }
 
+      .key-row { display: flex; align-items: center; gap: 12px; padding: 5px 0; }
+      .key-row .key-desc { flex: 1; font-size: 13px; }
+      .key-row button {
+        all: unset;
+        min-width: 100px;
+        padding: 6px 12px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--panel);
+        color: var(--fg);
+        text-align: center;
+        cursor: pointer;
+      }
+      .key-row button:focus { border-color: var(--accent); color: var(--accent); }
+      .key-row .note { min-width: 130px; font-size: 12px; color: var(--dim); }
+
       textarea {
         width: 100%;
         min-height: 160px;
@@ -142,6 +158,15 @@
           <button id="prefix" type="button" aria-label="Prefix key, click then press a combination">…</button>
           <span id="prefix-note" class="note" role="status" aria-live="polite"></span>
         </div>
+      </section>
+
+      <section>
+        <h2>Keys</h2>
+        <p>
+          Press a key for each action. Modifiers are ignored after the prefix,
+          so Ctrl-X and x are the same key. <code>?</code> and 1-9 are fixed.
+        </p>
+        <div id="keys"></div>
       </section>
 
       <section data-newtab>
