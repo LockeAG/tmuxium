@@ -61,7 +61,7 @@ globalThis.SV_UI = (() => {
       border-radius: 50%; background: #414868;
     }
     .row[data-audible="true"] .dot { background: #9ece6a; }
-    .row[data-muted="true"] .dot { background: transparent; border: 1px solid #9ece6a; }
+    .row[data-audible="true"][data-muted="true"] .dot { background: transparent; border: 1px solid #9ece6a; }
     .row[data-active="true"] .title { color: #9ece6a; }
 
     /* A colour derived from the hostname, not the site's favicon. Loading the

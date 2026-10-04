@@ -252,12 +252,14 @@ async function runPrefixAction(action, index, tab, state) {
     case 'sendnext': {
       const fresh = await chrome.tabs.get(id);
       const windows = await windowsFor(fresh);
+      // A popup is not in the ring, and Chrome refuses to move its tabs.
+      const at = windows.findIndex((w) => w.id === fresh.windowId);
+      if (at === -1) return state;
       if (windows.length < 2) {
         const alone = (await chrome.tabs.query({ windowId: fresh.windowId })).length < 2;
         if (!alone) await chrome.windows.create({ tabId: id, incognito: fresh.incognito });
         return state;
       }
-      const at = windows.findIndex((w) => w.id === fresh.windowId);
       const step = action === 'sendnext' ? 1 : -1;
       const target = windows[(at + step + windows.length) % windows.length];
       await chrome.tabs.move(id, { windowId: target.id, index: -1 });
