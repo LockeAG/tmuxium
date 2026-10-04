@@ -26,8 +26,9 @@
 
 /**
  * The id of a prefix action. Order in `ACTIONS` is help order and conflict
- * priority: when stored data disagrees, the earlier id wins a contested key.
- * @typedef {'switcher' | 'windows' | 'last' | 'prev' | 'next' | 'call' | 'create' | 'close' | 'vim' | 'settings'} ActionId
+ * priority: a stored key always beats a default, and when two stored lists,
+ * or two defaults, want the same key, the earlier id wins it.
+ * @typedef {'switcher' | 'windows' | 'last' | 'prev' | 'next' | 'moveleft' | 'moveright' | 'sendprev' | 'sendnext' | 'call' | 'audio' | 'mute' | 'create' | 'close' | 'vim' | 'settings'} ActionId
  */
 
 /**
@@ -102,7 +103,13 @@ globalThis.SV_SETTINGS = (() => {
     ['last', ['b', 'l'], 'toggle to the last tab you were on'],
     ['prev', ['p'], 'previous tab in order'],
     ['next', ['n'], 'next tab in order'],
+    ['moveleft', ['H', '<'], 'move this tab left in the strip'],
+    ['moveright', ['L', '>'], 'move this tab right in the strip'],
+    ['sendprev', ['K'], 'send this tab to the previous window'],
+    ['sendnext', ['J'], 'send this tab to the next window, or a new one'],
     ['call', ['m'], 'jump to a call, cycles if several'],
+    ['audio', ['a'], 'jump to a tab making sound, cycles if several'],
+    ['mute', ['M'], 'mute or unmute this tab'],
     ['create', ['c'], 'new tab'],
     ['close', ['x'], 'close tab'],
     ['vim', ['v'], 'toggle vim mode'],
@@ -225,11 +232,13 @@ globalThis.SV_SETTINGS = (() => {
   }
 
   /**
-   * Every action gets a list of currently bound keys: filled from its own
-   * defaults where nothing usable was stored, and with a key already claimed
-   * by an earlier action, in registry order, dropped from a later one. An
-   * action left with nothing takes any of its own defaults not already
-   * spoken for; failing that it stays empty, shown as unbound. Storage is
+   * Every action gets a list of currently bound keys, in two passes. First,
+   * each action with a stored list claims its usable stored keys, in registry
+   * order, so a key stored for an earlier action is dropped from a later one.
+   * Then each action left with nothing takes any of its own defaults not
+   * already spoken for; failing that it stays empty, shown as unbound. Stored
+   * keys go first so that a release adding an action whose default someone
+   * had already rebound elsewhere cannot take that key from them. Storage is
    * shared across machines and versions, so nothing here may throw.
    * @param {any} input
    * @returns {Record<ActionId, string[]>}
@@ -240,17 +249,18 @@ globalThis.SV_SETTINGS = (() => {
     /** @type {Record<string, string[]>} */
     const result = {};
 
+    for (const [id] of ACTIONS) {
+      const stored = Array.isArray(raw[id])
+        ? raw[id].filter((key) => isKeyChar(key) && !FIXED_KEYS.has(key))
+        : [];
+      result[id] = [...new Set(stored.filter((key) => !claimed.has(key)))];
+      result[id].forEach((key) => claimed.add(key));
+    }
+
     for (const [id, fallback] of ACTIONS) {
-      const stored = raw[id];
-      const requested = Array.isArray(stored)
-        ? stored.filter((key) => isKeyChar(key) && !FIXED_KEYS.has(key))
-        : fallback;
-
-      let keys = [...new Set(requested.filter((key) => !claimed.has(key)))];
-      if (!keys.length) keys = fallback.filter((key) => !claimed.has(key));
-
-      keys.forEach((key) => claimed.add(key));
-      result[id] = keys;
+      if (result[id].length) continue;
+      result[id] = fallback.filter((key) => !claimed.has(key));
+      result[id].forEach((key) => claimed.add(key));
     }
 
     return /** @type {Record<ActionId, string[]>} */ (result);
