@@ -61,6 +61,7 @@ globalThis.SV_UI = (() => {
       border-radius: 50%; background: #414868;
     }
     .row[data-audible="true"] .dot { background: #9ece6a; }
+    .row[data-muted="true"] .dot { background: transparent; border: 1px solid #9ece6a; }
     .row[data-active="true"] .title { color: #9ece6a; }
 
     /* A colour derived from the hostname, not the site's favicon. Loading the
@@ -291,7 +292,8 @@ globalThis.SV_UI = (() => {
           colourKey: t.url,
           active: t.id === activeTabId,
           live: Boolean(t.live),
-          audible: Boolean(t.audible)
+          audible: Boolean(t.audible),
+          muted: Boolean(t.muted)
         }))
       );
 
@@ -335,16 +337,19 @@ globalThis.SV_UI = (() => {
         const row = el('div', 'row');
         row.id = `sv-row-${rows.length}`;
         row.setAttribute('role', 'option');
-        row.setAttribute('aria-label', `${item.title}. ${item.url}`);
+        // The dot is the only sign of sound, so say it as well as draw it.
+        const sound = !item.audible ? '' : item.muted ? ', muted' : ', playing audio';
+        row.setAttribute('aria-label', `${item.title}. ${item.url}${sound}`);
         row.dataset.active = String(item.active);
         row.dataset.live = String(Boolean(item.live));
         row.dataset.audible = String(Boolean(item.audible));
+        row.dataset.muted = String(Boolean(item.muted));
         const icon = el('div', 'icon');
         icon.style.background = hostColour(item.colourKey ?? item.url);
         const text = el('div', 'text');
         text.append(el('div', 'title', item.title), el('div', 'url', item.url));
         row.append(icon, text);
-        if (item.live) row.append(el('div', 'dot'));
+        if (item.live || item.audible) row.append(el('div', 'dot'));
         row.addEventListener('click', () => pick(item));
         list.append(row);
         rows.push({ node: row, item });
