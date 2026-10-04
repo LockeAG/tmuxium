@@ -167,7 +167,8 @@ async function collectWindows() {
         url: t.url || '',
         active: t.active,
         live: isCall(t.url),
-        audible: Boolean(t.audible)
+        audible: Boolean(t.audible),
+        muted: Boolean(t.mutedInfo?.muted)
       }))
     }));
 }
@@ -185,6 +186,13 @@ async function focusTab(tabId) {
   await chrome.windows.update(tab.windowId, { focused: true });
 }
 
+// Normal windows in the order the tab tree numbers them, from the tab's own
+// side of the incognito line: Chrome refuses to move a tab across it.
+async function windowsFor(tab) {
+  const windows = await chrome.windows.getAll();
+  return windows.filter((w) => w.type === 'normal' && w.incognito === tab.incognito);
+}
+
 /**
  * The content script resolves a keypress to an action id, since it is the
  * only side that knows the user's settings. This switches on that id, never
@@ -196,6 +204,9 @@ async function focusTab(tabId) {
  * @returns {Promise<TabState>}
  */
 async function runPrefixAction(action, index, tab, state) {
+  const id = tab.id;
+  if (id === undefined) return state;
+
   switch (action) {
     case 'switcher':
     case 'windows':
@@ -222,6 +233,38 @@ async function runPrefixAction(action, index, tab, state) {
       await cycleTab(tab, -1);
       return state;
 
+    // `sender.tab` is a snapshot from when the key was pressed, so every case
+    // that reads the tab's position or state asks Chrome again first. No wrap
+    // at the edges: Chrome reads index -1 as "the end", not "one to the left".
+    case 'moveleft':
+    case 'moveright': {
+      const fresh = await chrome.tabs.get(id);
+      const last = (await chrome.tabs.query({ windowId: fresh.windowId })).length - 1;
+      const target = fresh.index + (action === 'moveright' ? 1 : -1);
+      if (target < 0 || target > last) return state;
+      await chrome.tabs.move(id, { index: target });
+      return state;
+    }
+
+    // tmux join-pane, and break-pane when there is nowhere else to go. Focus
+    // follows the tab, as it does for Chrome's own "Move tab to window".
+    case 'sendprev':
+    case 'sendnext': {
+      const fresh = await chrome.tabs.get(id);
+      const windows = await windowsFor(fresh);
+      if (windows.length < 2) {
+        const alone = (await chrome.tabs.query({ windowId: fresh.windowId })).length < 2;
+        if (!alone) await chrome.windows.create({ tabId: id, incognito: fresh.incognito });
+        return state;
+      }
+      const at = windows.findIndex((w) => w.id === fresh.windowId);
+      const step = action === 'sendnext' ? 1 : -1;
+      const target = windows[(at + step + windows.length) % windows.length];
+      await chrome.tabs.move(id, { windowId: target.id, index: -1 });
+      await focusTab(id);
+      return state;
+    }
+
     // Jump straight to the call. With more than one, cycle through them.
     case 'call': {
       const calls = (await chrome.tabs.query({})).filter((t) => isCall(t.url));
@@ -229,6 +272,25 @@ async function runPrefixAction(action, index, tab, state) {
       const at = calls.findIndex((t) => t.id === tab.id);
       const next = calls[(at + 1) % calls.length];
       if (next.id !== tab.id) await focusTab(next.id);
+      return state;
+    }
+
+    // Like `call`, for whatever you can hear. A muted tab is skipped, so
+    // muting one moves the next jump on to the one still playing.
+    case 'audio': {
+      const playing = (await chrome.tabs.query({ audible: true }))
+        .filter((t) => !t.mutedInfo?.muted)
+        .sort((a, b) => a.windowId - b.windowId || a.index - b.index);
+      if (!playing.length) return state;
+      const at = playing.findIndex((t) => t.id === id);
+      const next = playing[(at + 1) % playing.length];
+      if (next.id !== id) await focusTab(next.id);
+      return state;
+    }
+
+    case 'mute': {
+      const fresh = await chrome.tabs.get(id);
+      await chrome.tabs.update(id, { muted: !fresh.mutedInfo?.muted });
       return state;
     }
 
