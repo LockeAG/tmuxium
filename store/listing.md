@@ -53,6 +53,10 @@ Prefix, press Ctrl-A then:
   p, n           previous, next tab
   1-9            jump to a tab by position
   m              jump to a video call
+  a              jump to a tab playing sound
+  M              mute or unmute this tab
+  H <, L >       move this tab left, right
+  K, J           send this tab to the previous, next window
   c              new tab
   x              close this tab
   v              vim mode on or off
@@ -108,10 +112,9 @@ marks yet.
 
 WHAT'S NEW
 
-0.4.0: every key after the prefix can be rebound in settings, under Keys. The
-help overlay, the tab tree footer and the toolbar popup name the keys you
-actually have. The content script no longer writes to the console of every
-page it loads in.
+0.5.0: move the current tab left or right, or send it to another window, from
+the keyboard. Jump to whichever tab is playing sound, and mute it. The tab tree
+marks tabs making sound. Keys you rebound yourself survive the upgrade.
 
 Full history: https://github.com/LockeAG/tmuxium/blob/main/CHANGELOG.md
 
@@ -135,8 +138,9 @@ opening, closing and moving around tabs and pages using the keyboard.
 
 ```
 Needed to read tab titles and URLs so the tab switcher can list and filter them,
-and to recognise when a tab is a video call. Also used to activate, create and
-close tabs in response to the keyboard shortcuts the user presses. Titles and
+and to recognise when a tab is a video call or is playing sound. Also used to
+activate, create, close, move and mute tabs in response to the keyboard
+shortcuts the user presses. Titles and
 URLs are only ever shown back to the user in the overlay; nothing is stored
 beyond the browser session and nothing is transmitted.
 ```
@@ -214,7 +218,7 @@ https://github.com/LockeAG/tmuxium/blob/main/PRIVACY.md
 - [ ] Rewrite WHAT'S NEW in the description for this release: latest version
       only, a few plain lines, the CHANGELOG link carries the history. The
       description is the field that has been rejected twice, so it stays short
-- [ ] Check `manifest.json` in the zip says `Tmuxium`, version `0.4.0`, and
+- [ ] Check `manifest.json` in the zip says `Tmuxium`, version `0.5.0`, and
       lists exactly `tabs`, `storage`, `scripting`. Every upload must carry a
       higher version than the one before it, so never resubmit on the same
       number, even after a rejection

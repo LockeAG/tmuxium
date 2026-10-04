@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Tmuxium",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "tmux-style prefix and a vim mode for Chrome.",
   "minimum_chrome_version": "127",
   "background": {

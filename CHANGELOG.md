@@ -3,6 +3,27 @@
 Notable changes, newest first. Follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 loosely and [semantic versioning](https://semver.org/).
 
+## 0.5.0 - 2026-10-04
+
+### Added
+
+- **Move tabs.** `Ctrl-A H` or `<` moves the current tab left in the strip,
+  `L` or `>` moves it right. Pinned tabs and tab groups behave as they do when
+  you drag.
+- **Send tabs to another window.** `Ctrl-A K` sends the current tab to the
+  previous window, `J` to the next, and focus follows it. With only one window
+  it breaks the tab out into a new one, like tmux break-pane.
+- **Find the tab making sound.** `Ctrl-A a` jumps to the next tab playing
+  audio, skipping muted ones, and cycles if there are several. `Ctrl-A M` mutes
+  or unmutes the current tab.
+- The tab tree marks any tab playing sound with a green dot, hollow when the
+  tab is muted.
+
+### Changed
+
+- A key you rebound yourself now wins over a new action's default, so an
+  upgrade never takes a binding away from you.
+
 ## 0.4.0 - 2026-09-02
 
 Built while 0.3.0 sat in store review. Goes up as the next upload whatever the
@@ -46,8 +67,8 @@ higher version than the last.
 
 ## Planned
 
-For the release after 0.4.0, once the store listing is approved. Both change
-the submitted package, so neither goes in while a review is pending.
+For the release after 0.5.0. Both change the submitted package, so neither goes
+in while a review is pending.
 
 - **Search from the tab tree.** `Ctrl-Enter` searches the filter text with the
   configured engine, and the empty state becomes an offer to search rather than
