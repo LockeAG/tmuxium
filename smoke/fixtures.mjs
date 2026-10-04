@@ -40,9 +40,14 @@ export const test = base.extend({
     const profile = mkdtempSync(path.join(tmpdir(), 'tmuxium-'));
     const context = await chromium.launchPersistentContext(profile, {
       channel: 'chromium',
+      // Playwright mutes audio by default, and Chrome never marks a muted
+      // browser's tabs as audible, so the sound tests would wait forever.
+      ignoreDefaultArgs: ['--mute-audio'],
       args: [
         `--disable-extensions-except=${EXTENSION}`,
-        `--load-extension=${EXTENSION}`
+        `--load-extension=${EXTENSION}`,
+        // Lets a test page make sound without a gesture, so `audible` flips.
+        '--autoplay-policy=no-user-gesture-required'
       ]
     });
     await use(context);

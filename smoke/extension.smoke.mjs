@@ -309,3 +309,141 @@ test('adding a site to the blocklist makes it inert, live', async ({ context, wo
   await page.waitForTimeout(500);
   expect(await badge(worker, tabId)).toBe('');
 });
+
+test('the prefix moves the tab along the strip and stops at the edge', async ({ context, worker, site, prefix }) => {
+  // The context opens with about:blank at index 0, so this page lands at 1.
+  const page = await context.newPage();
+  await page.goto(site);
+  const other = await context.newPage();
+  await other.goto(site);
+  await page.bringToFront();
+  await page.locator('body').click();
+  const tabId = await activeTabId(worker);
+  const index = () => worker.evaluate(async (id) => (await chrome.tabs.get(id)).index, tabId);
+  expect(await index()).toBe(1);
+
+  await page.keyboard.press(prefix);
+  await page.keyboard.press('Shift+L');
+  await expect.poll(index).toBe(2);
+
+  await page.keyboard.press(prefix);
+  await page.keyboard.press('Shift+H');
+  await expect.poll(index).toBe(1);
+  await page.keyboard.press(prefix);
+  await page.keyboard.press('Shift+H');
+  await expect.poll(index).toBe(0);
+
+  // Unguarded, this would be index -1, which Chrome reads as the far end.
+  await page.keyboard.press(prefix);
+  await page.keyboard.press('Shift+H');
+  await page.waitForTimeout(300);
+  expect(await index()).toBe(0);
+});
+
+test('the prefix sends the tab to another window, and makes one if there is none', async ({ context, worker, site, prefix }) => {
+  const page = await context.newPage();
+  await page.goto(site);
+  await page.locator('body').click();
+  const tabId = await activeTabId(worker);
+  const windowCount = () => worker.evaluate(async () => (await chrome.windows.getAll()).length);
+  const windowOf = () => worker.evaluate(async (id) => (await chrome.tabs.get(id)).windowId, tabId);
+  const baseline = await windowCount();
+  const home = await windowOf();
+
+  // One window, so there is nowhere to send it but a new one.
+  await page.keyboard.press(prefix);
+  await page.keyboard.press('Shift+J');
+  await expect.poll(windowCount).toBe(baseline + 1);
+  expect(await windowOf()).not.toBe(home);
+
+  // Two windows now, so it goes back, and Chrome closes the one it left empty.
+  await page.bringToFront();
+  await page.locator('body').click();
+  await page.keyboard.press(prefix);
+  await page.keyboard.press('Shift+J');
+  await expect.poll(windowOf).toBe(home);
+  await expect.poll(windowCount).toBe(baseline);
+});
+
+test('the prefix mutes and unmutes the tab', async ({ context, worker, site, prefix }) => {
+  const page = await context.newPage();
+  await page.goto(site);
+  await page.locator('body').click();
+  const tabId = await activeTabId(worker);
+  const muted = () =>
+    worker.evaluate(async (id) => Boolean((await chrome.tabs.get(id)).mutedInfo?.muted), tabId);
+  expect(await muted()).toBe(false);
+
+  await page.keyboard.press(prefix);
+  await page.keyboard.press('Shift+M');
+  await expect.poll(muted).toBe(true);
+
+  await page.keyboard.press(prefix);
+  await page.keyboard.press('Shift+M');
+  await expect.poll(muted).toBe(false);
+});
+
+/** Start a tone too quiet to hear and wait until Chrome reports the tab as audible. */
+async function makeSound(page, worker, tabId) {
+  await page.evaluate(() => {
+    const audio = new AudioContext();
+    const tone = audio.createOscillator();
+    const gain = audio.createGain();
+    gain.gain.value = 0.002;
+    tone.connect(gain).connect(audio.destination);
+    tone.start();
+    globalThis.__tone = audio;
+  });
+  await expect
+    .poll(() => worker.evaluate(async (id) => (await chrome.tabs.get(id)).audible, tabId), { timeout: 15_000 })
+    .toBe(true);
+}
+
+test('the tab tree marks the tab making sound', async ({ context, worker, site, prefix }) => {
+  const page = await context.newPage();
+  await page.goto(site);
+  await page.locator('body').click();
+  const tabId = await activeTabId(worker);
+  await makeSound(page, worker, tabId);
+
+  await page.keyboard.press(prefix);
+  await page.keyboard.press('o');
+  await page.waitForTimeout(400);
+
+  // Closed shadow root again, so read it through CDP as the help test does.
+  const cdp = await context.newCDPSession(page);
+  const { root } = await cdp.send('DOM.getDocument', { depth: -1, pierce: true });
+
+  /** @param {any} node @param {string[][]} out */
+  function collectAttributes(node, out) {
+    if (node.attributes) out.push(node.attributes);
+    for (const child of node.children ?? []) collectAttributes(child, out);
+    for (const shadow of node.shadowRoots ?? []) collectAttributes(shadow, out);
+  }
+
+  const all = [];
+  collectAttributes(root, all);
+  const audible = all.filter((attrs) => {
+    const at = attrs.indexOf('data-audible');
+    return at !== -1 && attrs[at + 1] === 'true';
+  });
+  expect(audible.length).toBe(1);
+});
+
+test('the prefix jumps to the tab making sound', async ({ context, worker, site, prefix }) => {
+  const loud = await context.newPage();
+  await loud.goto(site);
+  await loud.locator('body').click();
+  const loudId = await activeTabId(worker);
+  await makeSound(loud, worker, loudId);
+
+  const page = await context.newPage();
+  await page.goto(site);
+  await page.bringToFront();
+  await page.locator('body').click();
+  expect(await activeTabId(worker)).not.toBe(loudId);
+
+  await page.keyboard.press(prefix);
+  await page.keyboard.press('a');
+  await expect.poll(() => activeTabId(worker)).toBe(loudId);
+});

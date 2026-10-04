@@ -286,6 +286,23 @@ test('a key claimed twice goes to the earlier action in registry order', () => {
   assert.deepEqual(withFallback.last, ['l'], 'last falls back to its other default, l, since b is taken');
 });
 
+test('a stored rebind survives a new action whose default is that key', () => {
+  const S = loadSettings();
+  // A 0.4.0 user who moved create to `a` must not lose it to audio on upgrade.
+  const keys = S.normalise({ keys: { create: ['a'] } }).keys;
+  assert.deepEqual(keys.create, ['a']);
+  assert.deepEqual(keys.audio, [], 'audio comes earlier but only has a default, so it goes unbound');
+});
+
+test('uppercase defaults do not shadow their lowercase neighbours', () => {
+  const S = loadSettings();
+  const keys = S.defaults().keys;
+  assert.equal(S.actionFor(keys, 'l'), 'last');
+  assert.equal(S.actionFor(keys, 'L'), 'moveright');
+  assert.equal(S.actionFor(keys, 'm'), 'call');
+  assert.equal(S.actionFor(keys, 'M'), 'mute');
+});
+
 test('actionFor matches case exactly', () => {
   const S = loadSettings();
   const keys = S.defaults().keys;
