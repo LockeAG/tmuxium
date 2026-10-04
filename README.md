@@ -52,6 +52,10 @@ be rebound in Settings, under Keys.
 | `p` / `n` | previous / next tab in order |
 | `1`-`9` | jump to a tab by position |
 | `m` | jump to a call, cycles if there are several |
+| `a` | jump to a tab playing sound, cycles if there are several |
+| `M` | mute or unmute this tab |
+| `H` / `<`, `L` / `>` | move this tab left / right |
+| `K` / `J` | send this tab to the previous / next window |
 | `c` | new tab |
 | `x` | close this tab |
 | `v` | vim mode on or off |
@@ -95,9 +99,10 @@ tab alone.
 
 ## Calls come first
 
-A live call is hoisted to the top under **In a call**, tinted, with a dot that
-turns green while the tab is making sound. `Ctrl-A m` skips the tree and jumps
-straight there.
+A live call is hoisted to the top under **In a call**, tinted. Any tab making
+sound gets a green dot in the tree, hollow when the tab is muted. `Ctrl-A m`
+skips the tree and jumps straight to the call, `Ctrl-A a` to whatever is
+playing.
 
 Recognised from the URL, so a meeting counts and a landing page does not. Meet,
 Zoom, Teams, Webex, Chime, GoTo, BlueJeans, Skype, Jitsi, Around, Gather. One
