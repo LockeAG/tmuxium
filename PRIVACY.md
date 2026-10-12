@@ -18,7 +18,7 @@ To be a tab switcher it has to see your tabs. Specifically:
 | --- | --- | --- |
 | Tab titles and URLs | to list and filter your tabs, and to tell whether a tab is a video call | the list drawn on your screen, nothing else |
 | Which tab is active, and which window | to switch to the right one and to offer "last tab" | in-memory session state |
-| Whether a tab is playing audio | the dot that marks a live call | the list on your screen |
+| Whether a tab is playing sound, and whether it is muted | to mark live calls and tabs making sound, and to jump to or mute them | the list on your screen |
 | Your most visited sites | the tiles on the replacement New Tab Page | that page, nothing else |
 | Your settings: the prefix key and the list of sites to stay out of | to apply them | `chrome.storage.sync`, so Chrome carries them to your other signed-in machines |
 
@@ -54,6 +54,10 @@ Two different stores are used, and the difference matters:
   installed.
 - It does not talk to other extensions or accept messages from web pages.
 
+Its use of the data above follows the
+[Chrome Web Store User Data Policy](https://developer.chrome.com/docs/webstore/program-policies/user-data-faq),
+including the Limited Use requirements.
+
 ## Permissions
 
 The Chrome Web Store build asks for fewer of these than the version in the
@@ -62,7 +66,7 @@ repository: it has no New Tab Page, so it needs neither `topSites` nor
 
 | Permission | What it is for |
 | --- | --- |
-| `tabs` | read tab titles and URLs, switch, create and close tabs |
+| `tabs` | read tab titles and URLs; switch, create, close, move and mute tabs, and send them to another window |
 | `storage` | session state for tabs, plus your settings (see above) |
 | `scripting` | start working in tabs that were already open when you installed it |
 | `topSites` | the tiles on the New Tab Page, repo build only |
@@ -82,4 +86,4 @@ Any change to this policy will appear in
 [CHANGELOG.md](CHANGELOG.md) and in the repository history at
 https://github.com/LockeAG/tmuxium.
 
-Last updated: 2026-08-07.
+Last updated: 2026-10-12.
