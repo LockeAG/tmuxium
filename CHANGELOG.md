@@ -3,6 +3,14 @@
 Notable changes, newest first. Follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 loosely and [semantic versioning](https://semver.org/).
 
+## Unreleased
+
+### Changed
+
+- [PRIVACY.md](PRIVACY.md) now covers moving and muting tabs and sending them
+  to another window, and states that data use follows the Chrome Web Store
+  Limited Use requirements.
+
 ## 0.5.0 - 2026-10-04
 
 ### Added
