@@ -41,21 +41,22 @@ jobs:
         run: |
           version=$(node -p "require('./dist/manifest.json').version")
           test "v$version" = "$GITHUB_REF_NAME"
-          echo "ZIP=tmuxium-$version.zip" >> "$GITHUB_ENV"
+          # Not ZIP: Info-ZIP reads $ZIP as extra command-line options.
+          echo "ARCHIVE=tmuxium-$version.zip" >> "$GITHUB_ENV"
 
       - name: Zip
         run: |
           cd dist
-          zip -X -r "../$ZIP" .
+          zip -X -r "../$ARCHIVE" .
           cd ..
-          sha256sum "$ZIP" > SHA256SUMS
+          sha256sum "$ARCHIVE" > SHA256SUMS
           cat SHA256SUMS
 
       - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
         with:
-          subject-path: ${{ env.ZIP }}
+          subject-path: ${{ env.ARCHIVE }}
 
       - name: Publish the release
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "$GITHUB_REF_NAME" "$ZIP" SHA256SUMS --verify-tag --generate-notes
+        run: gh release create "$GITHUB_REF_NAME" "$ARCHIVE" SHA256SUMS --verify-tag --generate-notes
