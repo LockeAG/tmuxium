@@ -1,0 +1,61 @@
+name: Release
+
+# Builds the store zip from the tag on GitHub's runners, so the file uploaded to
+# the Chrome Web Store can be checked against a build nobody's laptop touched.
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v4.4.0
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Unit tests
+        run: pnpm test
+
+      - name: Build the store package
+        run: pnpm build:store
+
+      # A tag that disagrees with the manifest would publish a zip the store
+      # rejects, or worse, one labelled as a version it is not.
+      - name: Check the tag matches the manifest
+        run: |
+          version=$(node -p "require('./dist/manifest.json').version")
+          test "v$version" = "$GITHUB_REF_NAME"
+          echo "ZIP=tmuxium-$version.zip" >> "$GITHUB_ENV"
+
+      - name: Zip
+        run: |
+          cd dist
+          zip -X -r "../$ZIP" .
+          cd ..
+          sha256sum "$ZIP" > SHA256SUMS
+          cat SHA256SUMS
+
+      - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: ${{ env.ZIP }}
+
+      - name: Publish the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" "$ZIP" SHA256SUMS --verify-tag --generate-notes
