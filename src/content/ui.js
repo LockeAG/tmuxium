@@ -54,6 +54,7 @@ globalThis.SV_UI = (() => {
       padding: 7px 10px; border-radius: 6px; cursor: pointer;
     }
     .row[data-selected="true"] { background: #292e42; }
+    .row[data-selected="true"] .url { color: #9aa5ce; }
     .row[data-live="true"] .title { color: #7dcfff; }
 
     .dot {

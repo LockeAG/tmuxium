@@ -23,8 +23,9 @@ loosely and [semantic versioning](https://semver.org/).
   a whole number from 1 to 9, and tab and window ids whole numbers. A content
   script runs inside pages the extension does not control.
 - Added [SECURITY.md](SECURITY.md) with a private way to report a hole.
-- Releases are built on GitHub from the tag, with the store zip, its SHA-256
-  and a build attestation attached to the GitHub release.
+- Releases are built on GitHub from the tag. The store zip and its SHA-256 are
+  attached to the GitHub release, and a build attestation is recorded for the
+  zip: check it with `gh attestation verify <zip> -R LockeAG/tmuxium`.
 - CI runs with read-only permissions and pins every action to a commit.
   Dependabot keeps the pins and dev dependencies current.
 
