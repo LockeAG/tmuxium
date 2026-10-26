@@ -40,13 +40,13 @@ globalThis.SV_UI = (() => {
       padding: 14px 16px; font-size: 14px; color: #c0caf5;
       border-bottom: 1px solid #292e42;
     }
-    .search::placeholder { color: #565f89; }
+    .search::placeholder { color: #828bb5; }
 
     .list { overflow-y: auto; padding: 6px; }
 
     .group {
       padding: 8px 10px 4px; font-size: 10px; letter-spacing: .1em;
-      text-transform: uppercase; color: #565f89;
+      text-transform: uppercase; color: #828bb5;
     }
 
     .row {
@@ -71,23 +71,30 @@ globalThis.SV_UI = (() => {
     .icon { width: 16px; height: 16px; flex: none; border-radius: 3px; opacity: .85; }
     .text { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
     .title { font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .url { font-size: 11px; color: #565f89; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .url { font-size: 11px; color: #828bb5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-    .empty { padding: 24px; text-align: center; color: #565f89; font-size: 13px; }
+    .empty { padding: 24px; text-align: center; color: #828bb5; font-size: 13px; }
 
     .footer {
       padding: 8px 14px; border-top: 1px solid #292e42;
-      font-size: 11px; color: #565f89;
+      font-size: 11px; color: #828bb5;
     }
 
     .panel:focus-visible { outline: 1px solid #7aa2f7; outline-offset: -1px; }
     .panel:focus:not(:focus-visible) { outline: none; }
 
-    .help { padding: 18px 20px; overflow-y: auto; }
-    .help section + section { margin-top: 18px; }
+    /* The prefix list outgrew one column: on a laptop screen the last rows sat
+       below the fold. Side by side when there is room, stacked when not. */
+    .panel.wide { width: min(880px, 92vw); }
+    .help {
+      padding: 18px 20px; overflow-y: auto;
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+      gap: 18px 32px; align-items: start;
+    }
+    .help section:first-child { grid-row: span 2; }
     .help h3 {
-      margin: 0 0 8px; font-size: 10px; letter-spacing: .1em;
-      text-transform: uppercase; color: #565f89; font-weight: 600;
+      margin: 0 0 8px; font-size: 11px; letter-spacing: .1em;
+      text-transform: uppercase; color: #828bb5; font-weight: 600;
     }
     .help dl {
       display: grid;
@@ -514,7 +521,7 @@ globalThis.SV_UI = (() => {
     const r = ensureRoot();
 
     const scrim = el('div', 'scrim');
-    const panel = el('div', 'panel');
+    const panel = el('div', 'panel wide');
     panel.setAttribute('role', 'dialog');
     panel.setAttribute('aria-modal', 'true');
     panel.setAttribute('aria-label', 'Keyboard shortcuts');
