@@ -314,7 +314,7 @@ async function runPrefixAction(action, index, tab, state) {
     // Digits are fixed, never in the registry, so the content script sends
     // them as their own action with the position rather than a key.
     case 'jump': {
-      if (index === undefined) return state;
+      if (typeof index !== 'number' || !Number.isInteger(index) || index < 1 || index > 9) return state;
       const tabs = await chrome.tabs.query({ windowId: tab.windowId });
       const target = tabs[index - 1];
       if (target) await chrome.tabs.update(target.id, { active: true });
@@ -327,6 +327,10 @@ async function runPrefixAction(action, index, tab, state) {
 }
 
 /* Messages from content scripts */
+
+// A content script runs inside pages we do not control, so every field it
+// sends is checked before it reaches a Chrome API.
+const isId = (value) => Number.isInteger(value) && value >= 0;
 
 async function handle(message, sender) {
   const tab = sender.tab;
@@ -369,6 +373,7 @@ async function handle(message, sender) {
 
     case 'setMode': {
       const state = await getState(tab.id);
+      if (message.mode !== 'off' && message.mode !== 'vim') return { mode: state.mode };
       await setState(tab.id, { ...state, mode: message.mode, armedAt: null });
       return { mode: message.mode };
     }
@@ -376,8 +381,10 @@ async function handle(message, sender) {
     case 'pick':
       // A window row focuses the window and leaves its active tab alone.
       if (message.windowId !== undefined) {
+        if (!isId(message.windowId)) return { ok: false };
         await chrome.windows.update(message.windowId, { focused: true }).catch(() => null);
       } else {
+        if (!isId(message.tabId)) return { ok: false };
         await focusTab(message.tabId);
       }
       return { ok: true };
@@ -391,6 +398,7 @@ async function handle(message, sender) {
       // that asks you to stay, and that you keep, survives and reappears the
       // next time the list is opened. Waiting on tabs.onRemoved instead would
       // hang for as long as the dialog sits there, which is worse.
+      if (!isId(message.tabId)) return { ok: false };
       try {
         await chrome.tabs.remove(message.tabId);
         return { ok: true };
