@@ -3,13 +3,30 @@
 Notable changes, newest first. Follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 loosely and [semantic versioning](https://semver.org/).
 
-## Unreleased
+## 0.5.1 - 2026-10-25
 
 ### Changed
 
+- The help screen (`Ctrl-A ?`) shows its sections side by side when the window
+  is wide enough, so the whole list fits on a laptop screen without scrolling.
+- Dim text in the overlay, popup, settings and New Tab Page is brighter, and
+  the light-theme settings accent darker, so every label meets WCAG AA
+  contrast. The popup headings are a step larger.
 - [PRIVACY.md](PRIVACY.md) now covers moving and muting tabs and sending them
   to another window, and states that data use follows the Chrome Web Store
   Limited Use requirements.
+
+### Security
+
+- The background worker checks every field a content script sends before it
+  reaches a Chrome API: the vim mode must be `off` or `vim`, the jump position
+  a whole number from 1 to 9, and tab and window ids whole numbers. A content
+  script runs inside pages the extension does not control.
+- Added [SECURITY.md](SECURITY.md) with a private way to report a hole.
+- Releases are built on GitHub from the tag, with the store zip, its SHA-256
+  and a build attestation attached to the GitHub release.
+- CI runs with read-only permissions and pins every action to a commit.
+  Dependabot keeps the pins and dev dependencies current.
 
 ## 0.5.0 - 2026-10-04
 
