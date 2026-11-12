@@ -6,6 +6,7 @@ import { isCall } from '../src/calls.js';
 const CALLS = [
   'https://meet.google.com/abc-defg-hij',
   'https://meet.google.com/abc-defg-hij?authuser=0',
+  'https://meet.google.com/meet/abc-defg-hij?authuser=0',
   'https://zoom.us/j/1234567890',
   'https://zoom.us/wc/join/1234567890',
   'https://app.zoom.us/wc/1234567890/join',
@@ -32,6 +33,7 @@ const CALLS = [
 const NOT_CALLS = [
   'https://meet.google.com/',
   'https://meet.google.com/landing',
+  'https://meet.google.com/meet/',
   'https://zoom.us/pricing',
   'https://app.zoom.us/wc/home',
   'https://fakezoom.us/j/1234567890',

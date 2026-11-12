@@ -14,8 +14,8 @@
 //   leaves nothing reliable behind, so only the join page matches.
 
 export const CALL_PATTERNS = [
-  // Google Meet: meeting codes are xxx-xxxx-xxx.
-  /^https:\/\/meet\.google\.com\/[a-z]{3}-[a-z]{4}-[a-z]{3}/i,
+  // Google Meet: meeting codes are xxx-xxxx-xxx, sometimes under /meet/.
+  /^https:\/\/meet\.google\.com\/(meet\/)?[a-z]{3}-[a-z]{4}-[a-z]{3}/i,
   // Zoom: a numeric meeting id, never /wc/home.
   /^https:\/\/([\w-]+\.)*zoom\.us\/(j\/\d|wc\/(join\/)?\d)/i,
   // Microsoft Teams: join pages only.
