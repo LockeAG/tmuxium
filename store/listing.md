@@ -112,8 +112,7 @@ marks yet.
 
 WHAT'S NEW
 
-0.5.1: the help screen fits on a laptop screen, dim text is easier to read,
-and the extension checks every message from a page more strictly.
+0.5.2: Ctrl-A m finds video calls at meeting addresses it used to miss.
 
 Full history: https://github.com/LockeAG/tmuxium/blob/main/CHANGELOG.md
 
@@ -217,7 +216,7 @@ https://github.com/LockeAG/tmuxium/blob/main/PRIVACY.md
 - [ ] Rewrite WHAT'S NEW in the description for this release: latest version
       only, a few plain lines, the CHANGELOG link carries the history. The
       description is the field that has been rejected twice, so it stays short
-- [ ] Check `manifest.json` in the zip says `Tmuxium`, version `0.5.1`, and
+- [ ] Check `manifest.json` in the zip says `Tmuxium`, version `0.5.2`, and
       lists exactly `tabs`, `storage`, `scripting`. Every upload must carry a
       higher version than the one before it, so never resubmit on the same
       number, even after a rejection

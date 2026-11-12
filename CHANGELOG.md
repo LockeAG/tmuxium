@@ -3,6 +3,14 @@
 Notable changes, newest first. Follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 loosely and [semantic versioning](https://semver.org/).
 
+## 0.5.2 - 2026-11-12
+
+### Fixed
+
+- `Ctrl-A m` and the tab tree now treat a Google Meet tab at
+  `meet.google.com/meet/<code>` as a call. Only `meet.google.com/<code>`
+  matched before, so the jump found nothing.
+
 ## 0.5.1 - 2026-10-25
 
 ### Changed
