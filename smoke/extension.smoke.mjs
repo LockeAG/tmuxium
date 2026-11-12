@@ -447,3 +447,24 @@ test('the prefix jumps to the tab making sound', async ({ context, worker, site,
   await page.keyboard.press('a');
   await expect.poll(() => activeTabId(worker)).toBe(loudId);
 });
+
+test('the prefix jumps to the call', async ({ context, worker, site, prefix }) => {
+  // Serve the Meet URL locally so the suite stays offline. The /meet/ path is
+  // the shape that went undetected before 0.5.2.
+  await context.route('https://meet.google.com/**', (route) =>
+    route.fulfill({ contentType: 'text/html', body: '<!doctype html><title>call</title>' })
+  );
+  const call = await context.newPage();
+  await call.goto('https://meet.google.com/meet/abc-defg-hij?authuser=0');
+  const callId = await activeTabId(worker);
+
+  const page = await context.newPage();
+  await page.goto(site);
+  await page.bringToFront();
+  await page.locator('body').click();
+  expect(await activeTabId(worker)).not.toBe(callId);
+
+  await page.keyboard.press(prefix);
+  await page.keyboard.press('m');
+  await expect.poll(() => activeTabId(worker)).toBe(callId);
+});
